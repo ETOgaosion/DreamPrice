@@ -31,6 +31,12 @@ is a change in what you own, not a bill that arrives — so the purchase is neve
 years, and the per-year figure is one year of running cost rather than an average. Moving the horizon
 slider does not change it. Resale value still appears on the detail page, clearly marked as context.
 
+There are exactly two buckets, and depreciation is in neither. You buy a car once, and after that it
+costs servicing, repairs, insurance, fuel, tax, tyres and parking to keep. A car being worth less later
+is a change in what you own, not a bill that arrives — so the purchase is never amortised across the
+years, and the per-year figure is one year of running cost rather than an average. Moving the horizon
+slider does not change it. Resale value still appears on the detail page, clearly marked as context.
+
 **The detail page is where you configure and interrogate.** Pick a trim, a model year, a district and a
 mileage. Every one of the 79 line items carries a `DATA ↗` link straight to its source, and hovering
 the row opens a card with the evidence: the figure, its low/base/high band across the three scenarios,
@@ -103,6 +109,8 @@ Every push to `main` runs three jobs; a pull request runs only the first.
 about 300,000 assertions in half a second. It checks that each line item is finite and non-negative,
 carries a known category, links to a source that exists in the registry, and ships at least two
 underlying data points for the hover card; that each asset's inputs default to legal values; that the
+per-year figure equals one year of running cost and does not move when the horizon changes; that no
+depreciation line ever reaches the annual bucket; that the
 per-year figure equals one year of running cost and does not move when the horizon changes; that no
 depreciation line ever reaches the annual bucket; that FX conversion round-trips losslessly; that a quarter really is a year
 divided by four and each period table's rows sum to the total it prints; and that every element each
