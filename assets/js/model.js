@@ -105,10 +105,19 @@ export function evaluate(asset, state) {
     vehiclePrice,
     capitalBase,
     perYear: { cash: cashTotal / years, all: trueTotal / years },
+    perQuarter: { cash: cashTotal / years / 4, all: trueTotal / years / 4 },
     perMonth: { cash: cashTotal / years / 12, all: trueTotal / years / 12 },
     perDay: { cash: cashTotal / years / DAYS_PER_YEAR, all: trueTotal / years / DAYS_PER_YEAR },
   };
 }
+
+/* The four periods the overview page is built around. */
+export const PERIODS = [
+  { id: 'perYear',    label: 'Per year',    zh: '每年',   note: 'averaged over the whole horizon' },
+  { id: 'perQuarter', label: 'Per quarter', zh: '每季度', note: 'one year divided by four' },
+  { id: 'perMonth',   label: 'Per month',   zh: '每月',   note: 'what leaves your account monthly' },
+  { id: 'perDay',     label: 'Per day',     zh: '每天',   note: 'including the days you do not drive' },
+];
 
 function nextResidual(asset, v, ctx, current, price, year) {
   /* Appreciating asset (the R35) — compounded off the original price. */
@@ -152,7 +161,11 @@ export function evaluateAll(state) {
 }
 
 export function portfolio(results, displayCurrency, includeCapital, enabled) {
-  const t = { upFront: 0, refundable: 0, perYear: 0, perMonth: 0, perDay: 0, total: 0, byCategory: new Map() };
+  const t = {
+    upFront: 0, refundable: 0,
+    perYear: 0, perQuarter: 0, perMonth: 0, perDay: 0,
+    total: 0, byCategory: new Map(),
+  };
   for (const [id, r] of Object.entries(results)) {
     if (enabled && !enabled[id]) continue;
     const cur = r.asset.currency;
@@ -160,6 +173,7 @@ export function portfolio(results, displayCurrency, includeCapital, enabled) {
     t.upFront += convert(r.upFront, cur, displayCurrency);
     t.refundable += convert(r.refundable, cur, displayCurrency);
     t.perYear += convert(r.perYear[key], cur, displayCurrency);
+    t.perQuarter += convert(r.perQuarter[key], cur, displayCurrency);
     t.perMonth += convert(r.perMonth[key], cur, displayCurrency);
     t.perDay += convert(r.perDay[key], cur, displayCurrency);
     t.total += convert(includeCapital ? r.trueTotal : r.cashTotal, cur, displayCurrency);

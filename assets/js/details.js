@@ -1,28 +1,13 @@
-/* DreamPrice — UI */
+/* DreamPrice — detail page: every asset, every line item, every source. */
 
-import { ASSETS, CATEGORIES, CAVEATS, FX, SRC } from './data.js';
+import { ASSETS, CATEGORIES, CAVEATS, SRC } from './data.js';
 import {
-  categoryBreakdown, convert, defaultInputs, evaluateAll,
-  fmt, fmtCompact, portfolio,
+  categoryBreakdown, convert, evaluateAll, fmt, fmtCompact, PERIODS,
 } from './model.js';
+import { bindGlobalControls, loadState, saveState } from './state.js';
 
-/* ---------------- state ---------------- */
-const state = {
-  currency: 'CNY',
-  scenario: 'base',
-  years: 5,
-  inflation: 0.02,
-  includeCapital: true,
-  variants: {},
-  inputs: {},
-  enabled: {},
-};
-
-for (const a of ASSETS) {
-  state.variants[a.id] = a.defaultVariant;
-  state.inputs[a.id] = defaultInputs(a);
-  state.enabled[a.id] = true;
-}
+/* Shared with the overview page through localStorage. */
+const state = loadState();
 
 /* ---------------- helpers ---------------- */
 const $ = (sel) => document.querySelector(sel);
@@ -39,35 +24,9 @@ function srcLink(src) {
   return `<div class="li-src"><a href="${src.u}" target="_blank" rel="noopener">${esc(src.t)}</a></div>`;
 }
 
-/* ---------------- headline totals ---------------- */
-function renderTotals(results) {
-  const cur = state.currency;
-  const p = portfolio(results, cur, state.includeCapital, state.enabled);
-  const n = Object.values(state.enabled).filter(Boolean).length;
-
-  const cards = [
-    { lbl: 'To get started', val: fmtCompact(p.upFront, cur), sub: `of which ${fmtCompact(p.refundable, cur)} is refundable deposit`, flag: true },
-    { lbl: 'Per year', val: fmtCompact(p.perYear, cur), sub: `averaged over ${state.years} year${state.years > 1 ? 's' : ''}` },
-    { lbl: 'Per month', val: fmtCompact(p.perMonth, cur), sub: 'every month, indefinitely' },
-    { lbl: 'Per day', val: fmt(p.perDay, cur, { digits: 0 }), sub: 'while you sleep, too', flag: true },
-    { lbl: `Total over ${state.years} yr`, val: fmtCompact(p.total + p.upFront - p.refundable, cur), sub: 'up-front plus everything after' },
-  ];
-
-  $('#totals').replaceChildren(...cards.map((c) => {
-    const d = el('div', 'tot' + (c.flag ? ' flag' : ''));
-    d.append(el('div', 'lbl', c.lbl), el('div', 'val', c.val), el('div', 'sub', c.sub));
-    return d;
-  }));
-
-  const dropped = ASSETS.filter((a) => !state.enabled[a.id]).map((a) => a.name);
-  $('#totals-note').innerHTML =
-    `${n} of ${ASSETS.length} assets included` +
-    (dropped.length ? `, excluding ${esc(dropped.join(', '))}` : '') +
-    `. ${state.includeCapital
-      ? 'Depreciation is counted as a real cost, because it is — you just do not write a cheque for it.'
-      : 'Depreciation is excluded, so these are pure out-of-pocket payments.'}` +
-    ` Running costs grow at ${(state.inflation * 100).toFixed(1)}%/yr; rents grow at each market's own escalation rate.`;
-}
+/* Persist and redraw. Every per-asset control routes through here so the
+   overview page sees the change on the next navigation. */
+const commit = () => { saveState(state); render(); };
 
 /* ---------------- chart ---------------- */
 function renderChart(results) {
@@ -129,7 +88,7 @@ function card(asset, r) {
   cb.type = 'checkbox';
   cb.checked = state.enabled[asset.id];
   cb.title = 'Include in the totals';
-  cb.addEventListener('change', () => { state.enabled[asset.id] = cb.checked; render(); });
+  cb.addEventListener('change', () => { state.enabled[asset.id] = cb.checked; commit(); });
   onoff.append(cb);
   title.append(onoff);
   head.append(title, el('p', 'blurb', esc(asset.blurb)));
@@ -146,7 +105,7 @@ function card(asset, r) {
     if (v.id === state.variants[asset.id]) o.selected = true;
     select.append(o);
   }
-  select.addEventListener('change', () => { state.variants[asset.id] = select.value; render(); });
+  select.addEventListener('change', () => { state.variants[asset.id] = select.value; commit(); });
   vsel.append(select);
   box.append(vsel);
 
@@ -163,7 +122,7 @@ function card(asset, r) {
       Object.assign(range, { type: 'range', min: inp.min, max: inp.max, step: inp.step, value: state.inputs[asset.id][inp.id] });
       range.addEventListener('input', () => {
         state.inputs[asset.id][inp.id] = Number(range.value);
-        render();
+        commit();
       });
       l.append(range);
     } else {
@@ -174,7 +133,7 @@ function card(asset, r) {
         if (o.v === state.inputs[asset.id][inp.id]) opt.selected = true;
         s.append(opt);
       }
-      s.addEventListener('change', () => { state.inputs[asset.id][inp.id] = s.value; render(); });
+      s.addEventListener('change', () => { state.inputs[asset.id][inp.id] = s.value; commit(); });
       l.append(s);
     }
     box.append(l);
@@ -186,11 +145,15 @@ function card(asset, r) {
   /* KPIs */
   const kpis = el('div', 'kpis');
   const cross = cur !== disp;
+  const show = (amount) => (Math.abs(amount) < 1000 ? fmt(amount, cur, { digits: 0 }) : fmtCompact(amount, cur));
   const items = [
     ['Up front', fmtCompact(r.upFront, cur), r.refundable ? `${fmtCompact(r.refundable, cur)} refundable` : ''],
-    ['Per year', fmtCompact(r.perYear[key], cur), cross ? `≈ ${fmtCompact(convert(r.perYear[key], cur, disp), disp)}` : ''],
-    ['Per month', fmtCompact(r.perMonth[key], cur), cross ? `≈ ${fmtCompact(convert(r.perMonth[key], cur, disp), disp)}` : ''],
-    ['Per day', fmt(r.perDay[key], cur, { digits: 0 }), cross ? `≈ ${fmt(convert(r.perDay[key], cur, disp), disp, { digits: 0 })}` : ''],
+    /* The same four periods the front page is built around. */
+    ...PERIODS.map((p) => [
+      p.label,
+      show(r[p.id][key]),
+      cross ? `≈ ${fmt(convert(r[p.id][key], cur, disp), disp, { digits: 0 })}` : '',
+    ]),
   ];
   for (const [lbl, val, alt] of items) {
     const k = el('div', 'kpi');
@@ -328,8 +291,6 @@ function renderStatic() {
     return a;
   }));
 
-  $('#fx-stamp').textContent =
-    `1 USD = ${FX.perUsd.CNY} CNY = ${FX.perUsd.JPY} JPY = ${FX.perUsd.NOK} NOK`;
 }
 
 /* ---------------- render ---------------- */
@@ -338,7 +299,6 @@ const openBlocks = new Set();
 
 function render() {
   const results = evaluateAll(state);
-  renderTotals(results);
   renderChart(results);
   renderAssets(results);
 
@@ -354,19 +314,7 @@ function render() {
 }
 
 /* ---------------- wiring ---------------- */
-$('#currency').addEventListener('change', (e) => { state.currency = e.target.value; render(); });
-$('#scenario').addEventListener('change', (e) => { state.scenario = e.target.value; render(); });
-$('#years').addEventListener('input', (e) => {
-  state.years = Number(e.target.value);
-  $('#years-out').textContent = `${state.years} yr`;
-  render();
-});
-$('#inflation').addEventListener('input', (e) => {
-  state.inflation = Number(e.target.value) / 100;
-  $('#inflation-out').textContent = `${Number(e.target.value).toFixed(1)}%`;
-  render();
-});
-$('#capital').addEventListener('change', (e) => { state.includeCapital = e.target.checked; render(); });
+bindGlobalControls(state, render);
 
 renderStatic();
 render();

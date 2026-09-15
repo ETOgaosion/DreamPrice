@@ -18,10 +18,20 @@ per month, and per day.
 
 ## What it does
 
-Pick a trim, a model year, a district and a mileage, then read four numbers: up-front, per year, per
-month, per day. Every line item expands to show what it is, where the number came from, and where it
-is shaky. Three scenarios (optimistic / realistic / pessimistic) drive every range at once, and a
-horizon slider runs the year-by-year schedule including depreciation.
+Two pages, deliberately.
+
+**The front page answers the question and nothing else** — four tables, one per period: per year
+(每年), per quarter (每季度), per month (每月), per day (每天). Each lists the six assets dearest first,
+with a tint behind each row showing its share, and a total. The one-off cost sits separately below,
+because it is not a period and folding it into the tables would make them lie.
+
+**The detail page is where you configure and interrogate.** Pick a trim, a model year, a district and a
+mileage; every line item expands to show what it is, where the number came from, and where it is shaky.
+It also carries the composition chart, the caveats and the source list.
+
+Settings live in `localStorage`, so anything you change on one page is already applied on the other.
+Three scenarios (optimistic / realistic / pessimistic) drive every range at once, and a horizon slider
+runs the year-by-year schedule including depreciation.
 
 Both cars are budgeted second-hand at roughly ¥500,000 CNY each — about ¥11.4M in Tokyo and
 NOK 695,000 in Tromsø.
@@ -62,12 +72,15 @@ node scripts/check.mjs        # validate the model and data
 ## Layout
 
 ```
-index.html
+index.html              overview — the four period tables
+details.html            configuration, line items, caveats, sources
 assets/css/styles.css
-assets/js/data.js     researched figures, sources and caveats
-assets/js/model.js    cost engine, FX, year-by-year schedule
-assets/js/app.js      rendering and controls
-scripts/check.mjs     pre-deploy validation
+assets/js/data.js       researched figures, sources and caveats
+assets/js/model.js      cost engine, FX, periods, year-by-year schedule
+assets/js/state.js      shared settings, persisted across both pages
+assets/js/overview.js   renders the period tables
+assets/js/details.js    renders the asset cards and chart
+scripts/check.mjs       pre-deploy validation
 .github/workflows/deploy.yml
 ```
 
@@ -76,18 +89,19 @@ scripts/check.mjs     pre-deploy validation
 Every push to `main` runs three jobs; a pull request runs only the first.
 
 **Validate** walks every asset against every variant, scenario, per-asset input extreme and horizon —
-about 220,000 assertions in half a second. It checks that each line item is finite and non-negative,
+about 300,000 assertions in half a second. It checks that each line item is finite and non-negative,
 carries a known category, and cites a source that exists in the registry; that each asset's inputs
-default to legal values; that FX conversion round-trips losslessly; and that every element `app.js`
-writes into actually exists in `index.html`. It also asserts **scenario ordering**: the optimistic case
-must cost less than the realistic one, which must cost less than the pessimistic one. That last check
-exists because it caught a real bug — the R35's appreciation ranges were inverted, which made the
-pessimistic scenario come out cheapest.
+default to legal values; that FX conversion round-trips losslessly; that a quarter really is a year
+divided by four and each period table's rows sum to the total it prints; and that every element each
+page's script writes into actually exists in that page's markup, with the two pages linking to each
+other. It also asserts **scenario ordering**: the optimistic case must cost less than the realistic one,
+which must cost less than the pessimistic one. That last check exists because it caught a real bug —
+the R35's appreciation ranges were inverted, which made the pessimistic scenario come out cheapest.
 
 **Deploy** publishes to GitHub Pages via `actions/deploy-pages`, uploading only `index.html`,
-`assets/` and `.nojekyll`.
+`details.html`, `assets/` and `.nojekyll`.
 
-**Verify** then fetches the live URL and confirms the page and all four asset files return 200 and the
+**Verify** then fetches the live URLs and confirms both pages and every asset file return 200 and the
 markup still contains its entry points — because deploying successfully and rendering correctly are
 different things.
 

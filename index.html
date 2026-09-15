@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>DreamPrice — what the dream actually costs</title>
-<meta name="description" content="Sourced, line-by-line running costs for a Lotus Emeya in Shenzhen, a Nissan GT-R in Tokyo, a Mercedes-AMG in Tromsø, and somewhere to live in each. Per year, per month, per day." />
+<title>DreamPrice — what the dream costs per year, quarter, month and day</title>
+<meta name="description" content="What six dream assets across China, Japan and Norway cost to keep — per year, per quarter, per month and per day. Every figure from a tax table, an official tariff or a live listing." />
 <meta name="color-scheme" content="dark" />
 <meta property="og:title" content="DreamPrice — what the dream actually costs" />
-<meta property="og:description" content="Six assets across three countries, costed line by line from primary sources. Per year, per month, per day." />
+<meta property="og:description" content="Per year, per quarter, per month, per day. Six assets, three countries, every figure sourced." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
@@ -17,28 +17,20 @@
 
 <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
 
-<header class="hero">
+<header class="hero hero-slim">
   <div class="wrap">
-    <p class="kicker">Six assets · three countries · one spreadsheet that refused to stay a spreadsheet</p>
     <h1>What the dream<br /><em>actually</em> costs.</h1>
     <p class="lede">
-      Two cars and somewhere to live, in each of three countries — a Lotus Emeya and a loft in Shenzhen,
-      a Nissan GT-R and a tower mansion in Tokyo, a Mercedes-AMG and a small house above the Arctic
-      Circle. Every number comes from a tax table, an official tariff or a live listing, broken down
-      per year, per month and per day.
-    </p>
-    <p class="stamp">
-      Researched <time datetime="2026-09-15">15 September 2026</time>
-      · <span id="fx-stamp"></span>
-      · <a href="#sources">all sources</a>
+      Two cars and somewhere to live, in each of three countries. Here is the bill — per year, per
+      quarter, per month, and per day.
     </p>
   </div>
 </header>
 
-<nav class="controls" id="controls" aria-label="Model controls">
+<nav class="controls" id="controls" aria-label="Model settings">
   <div class="wrap controls-inner">
     <label class="ctl">
-      <span>Show in</span>
+      <span>Currency</span>
       <select id="currency">
         <option value="CNY">CNY ¥ — 人民币</option>
         <option value="JPY">JPY ¥ — 円</option>
@@ -50,94 +42,88 @@
     <label class="ctl">
       <span>Scenario</span>
       <select id="scenario">
-        <option value="low">Optimistic — everything goes right</option>
-        <option value="base" selected>Realistic — the base case</option>
-        <option value="high">Pessimistic — it all loads up</option>
+        <option value="low">Optimistic</option>
+        <option value="base">Realistic</option>
+        <option value="high">Pessimistic</option>
       </select>
     </label>
     <label class="ctl">
-      <span>Horizon <b id="years-out">5 yr</b></span>
+      <span>Averaged over <b id="years-out">5 yr</b></span>
       <input type="range" id="years" min="1" max="15" step="1" value="5" />
     </label>
-    <label class="ctl">
-      <span>Cost inflation <b id="inflation-out">2%</b></span>
-      <input type="range" id="inflation" min="0" max="8" step="0.5" value="2" />
-    </label>
-    <label class="ctl toggle">
-      <input type="checkbox" id="capital" checked />
-      <span>Count depreciation as a cost</span>
-    </label>
+    <a class="ctl-link" href="./details.html">Configure &amp; see every line →</a>
   </div>
 </nav>
 
 <main>
 
-  <section class="wrap band">
-    <div class="totals" id="totals"></div>
-    <p class="totals-note" id="totals-note"></p>
+  <!-- The answer, four ways. Nothing else on this page competes with it. -->
+  <section class="wrap band band-tight">
+    <div class="periods" id="periods"></div>
   </section>
 
   <section class="wrap band">
-    <div class="section-head">
-      <h2>Where the money goes</h2>
-      <p>
-        Average annual cost of each asset over your horizon, split by what you are actually buying.
-        Bars share one scale, so the comparison is honest.
-      </p>
-    </div>
-    <div class="chart" id="chart"></div>
-    <div class="legend" id="legend"></div>
+    <div class="upfront" id="upfront"></div>
   </section>
 
   <section class="wrap band">
-    <div class="section-head">
-      <h2>The six assets</h2>
-      <p>
-        Pick a trim, a model year, a district, a mileage. Both cars are budgeted second-hand at roughly
-        ¥500,000 CNY each — about ¥11.4M in Tokyo and NOK 695,000 in Tromsø. Every line item expands to
-        show what it is, where the number came from, and where it is shaky. Uncheck an asset to drop it
-        from the totals.
-      </p>
+    <div class="steps">
+      <div class="step">
+        <b>1</b>
+        <h3>Configure <small>选择配置</small></h3>
+        <p>
+          Pick a trim, a model year, a district and a mileage on the
+          <a href="./details.html">detail page</a>. Both cars are budgeted second-hand at roughly
+          ¥500,000 CNY each.
+        </p>
+      </div>
+      <div class="step">
+        <b>2</b>
+        <h3>Every line is sourced <small>逐条取数</small></h3>
+        <p>
+          Purchase tax, insurance, rent, electricity, tyres, tolls, parking. Each figure comes from a tax
+          table, an official tariff or a live listing — never a guess.
+        </p>
+      </div>
+      <div class="step">
+        <b>3</b>
+        <h3>Read the four periods <small>看四个周期</small></h3>
+        <p>
+          Everything is summed, escalated over your horizon, converted to one currency, and divided into
+          a year, a quarter, a month and a day.
+        </p>
+      </div>
     </div>
-    <div class="assets" id="assets"></div>
   </section>
 
   <section class="wrap band">
-    <div class="section-head">
-      <h2>Things the numbers don't tell you</h2>
-      <p>Eleven findings from the research that change the decision, not just the arithmetic.</p>
+    <div class="cta">
+      <div>
+        <h2>Want to know why?</h2>
+        <p>
+          The detail page has all six assets with every line item, what it means, where the number came
+          from, a year-by-year schedule, and the findings that change the decision rather than just the
+          arithmetic.
+        </p>
+      </div>
+      <a class="btn" href="./details.html">详细配置 · Detail &amp; sources →</a>
     </div>
-    <div class="caveats" id="caveats"></div>
-  </section>
-
-  <section class="wrap band" id="sources">
-    <div class="section-head">
-      <h2>Sources</h2>
-      <p>
-        Primary and official wherever one exists: tax tables, tariff schedules, statistical bureaux,
-        manufacturer price lists. Where only listings or trade estimates exist, the line is marked
-        <span class="pill est">estimate</span> in the breakdowns above.
-      </p>
-    </div>
-    <div class="sources" id="sources-list"></div>
   </section>
 
 </main>
 
 <footer>
   <div class="wrap">
-    <p>
-      <strong>DreamPrice.</strong> Built for one person's specific dream. Not financial advice, not a
-      quote, and definitely not a substitute for calling an insurer.
-    </p>
+    <p><strong>DreamPrice.</strong> Not financial advice, not a quote, and not a substitute for calling an insurer.</p>
     <p class="muted">
-      Currency conversion pivots on USD using Norges Bank and PBOC reference rates from
-      <time datetime="2026-09-14">14 September 2026</time>. FX moves; the model does not re-fetch.
-      Read <a href="https://github.com/ETOgaosion/DreamPrice">the repo</a>.
+      Researched <time datetime="2026-09-15">15 September 2026</time>.
+      <span id="fx-stamp"></span>
+      · <a href="./details.html#sources">all sources</a>
+      · <a href="https://github.com/ETOgaosion/DreamPrice">repo</a>
     </p>
   </div>
 </footer>
 
-<script type="module" src="./assets/js/app.js"></script>
+<script type="module" src="./assets/js/overview.js"></script>
 </body>
 </html>

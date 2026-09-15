@@ -14,7 +14,7 @@ import { dirname, resolve, join } from 'node:path';
 
 import { ASSETS, CATEGORIES, CAVEATS, FX, SRC } from '../assets/js/data.js';
 import {
-  categoryBreakdown, convert, defaultInputs, evaluateAll, fmt, portfolio, variantOf,
+  categoryBreakdown, convert, defaultInputs, evaluateAll, fmt, PERIODS, portfolio, variantOf,
 } from '../assets/js/model.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -157,14 +157,33 @@ for (const asset of ASSETS) {
             for (const key of ['upFront', 'runningYear1', 'trueTotal', 'cashTotal', 'finalResidual']) {
               check(Number.isFinite(r[key]), `${where}: ${key} is finite`, String(r[key]));
             }
+            /* The four periods must be internally consistent — a quarter is a
+               quarter of a year, a month a twelfth, whichever view is selected. */
+            for (const view of ['all', 'cash']) {
+              const y = r.perYear[view];
+              check(Number.isFinite(y), `${where}: perYear.${view} is finite`);
+              check(Math.abs(r.perQuarter[view] - y / 4) < 1e-6, `${where}: perQuarter.${view} == perYear/4`);
+              check(Math.abs(r.perMonth[view] - y / 12) < 1e-6, `${where}: perMonth.${view} == perYear/12`);
+              check(Math.abs(r.perDay[view] - y / 365.25) < 1e-6, `${where}: perDay.${view} == perYear/365.25`);
+            }
             check(r.refundable <= r.upFront + 0.01, `${where}: refundable does not exceed up-front`);
             check(r.schedule.length === years, `${where}: schedule has ${years} rows`, String(r.schedule.length));
 
             for (const currency of CURRENCIES) {
               for (const includeCapital of [true, false]) {
                 const p = portfolio(results, currency, includeCapital, state.enabled);
-                for (const key of ['upFront', 'perYear', 'perMonth', 'perDay', 'total']) {
+                for (const key of ['upFront', 'perYear', 'perQuarter', 'perMonth', 'perDay', 'total']) {
                   check(Number.isFinite(p[key]), `${where}/${currency}: portfolio ${key} is finite`, String(p[key]));
+                }
+                /* Each period table's rows must sum to the total it prints. */
+                for (const period of PERIODS) {
+                  const rows = ASSETS
+                    .filter((a) => state.enabled[a.id])
+                    .reduce((t, a) => t + convert(
+                      results[a.id][period.id][includeCapital ? 'all' : 'cash'], a.currency, currency), 0);
+                  check(Math.abs(rows - p[period.id]) < 0.01,
+                    `${where}/${currency}: ${period.id} rows sum to the printed total`,
+                    `${rows} vs ${p[period.id]}`);
                 }
                 const cats = categoryBreakdown(r, currency, includeCapital);
                 check(cats.every(([, amt]) => Number.isFinite(amt) && amt > 0),
@@ -218,21 +237,64 @@ for (const [i, c] of CAVEATS.entries()) {
 console.log(`  ${CAVEATS.length} caveats`);
 
 /* ------------------------------------------------------------------ */
-section('Static assets referenced by index.html');
+section('Periods');
 /* ------------------------------------------------------------------ */
-const html = readFileSync(join(root, 'index.html'), 'utf8');
-const refs = [...html.matchAll(/(?:src|href)="(\.\/[^"]+)"/g)].map((m) => m[1]);
-check(refs.length > 0, 'index.html references local assets');
-for (const ref of new Set(refs)) {
-  check(existsSync(join(root, ref.replace(/^\.\//, ''))), `${ref} exists on disk`);
+check(PERIODS.length === 4, 'there are four periods', String(PERIODS.length));
+for (const p of PERIODS) {
+  check(typeof p.label === 'string' && p.label.length > 3, `period ${p.id}: has an English label`);
+  check(typeof p.zh === 'string' && p.zh.length >= 2, `period ${p.id}: has a Chinese label`);
+  check(typeof p.note === 'string' && p.note.length > 10, `period ${p.id}: has a note`);
 }
-/* Every element the UI writes into must actually be in the markup. */
-const app = readFileSync(join(root, 'assets/js/app.js'), 'utf8');
-for (const m of app.matchAll(/\$\('#([\w-]+)'\)/g)) {
-  check(html.includes(`id="${m[1]}"`), `app.js targets #${m[1]}, which exists in index.html`);
+console.log(`  ${PERIODS.map((p) => `${p.label} / ${p.zh}`).join(' · ')}`);
+
+/* ------------------------------------------------------------------ */
+section('Pages and static assets');
+/* ------------------------------------------------------------------ */
+/*
+ * Each page gets checked against its own script: every local file it references
+ * has to exist, and every element the script writes into has to be in the markup.
+ */
+const PAGES = [
+  { html: 'index.html', script: 'assets/js/overview.js' },
+  { html: 'details.html', script: 'assets/js/details.js' },
+];
+
+for (const page of PAGES) {
+  check(existsSync(join(root, page.html)), `${page.html} exists`);
+  check(existsSync(join(root, page.script)), `${page.script} exists`);
+  if (!existsSync(join(root, page.html)) || !existsSync(join(root, page.script))) continue;
+
+  const html = readFileSync(join(root, page.html), 'utf8');
+  const script = readFileSync(join(root, page.script), 'utf8');
+
+  const refs = [...html.matchAll(/(?:src|href)="(\.\/[^"#]+)/g)].map((m) => m[1]);
+  check(refs.length > 0, `${page.html} references local files`);
+  for (const ref of new Set(refs)) {
+    check(existsSync(join(root, ref.replace(/^\.\//, ''))), `${page.html} -> ${ref} exists on disk`);
+  }
+  check(html.includes(page.script), `${page.html} loads ${page.script}`);
+
+  for (const m of script.matchAll(/\$\('#([\w-]+)'\)/g)) {
+    check(html.includes(`id="${m[1]}"`), `${page.script} targets #${m[1]}, present in ${page.html}`);
+  }
+  /* Both pages carry the same global controls, bound by state.js. */
+  for (const m of readFileSync(join(root, 'assets/js/state.js'), 'utf8').matchAll(/\$\('#([\w-]+)'\)/g)) {
+    if (!html.includes(`id="${m[1]}"`)) continue; // optional per page, but if absent must be tolerated
+    check(true, `${page.html} has optional control #${m[1]}`);
+  }
 }
-for (const id of ['assets/js/data.js', 'assets/js/model.js', 'assets/js/app.js', '.nojekyll']) {
-  check(existsSync(join(root, id)), `${id} is present`);
+
+/* The two pages must link to each other, or the split strands the reader. */
+check(readFileSync(join(root, 'index.html'), 'utf8').includes('details.html'),
+  'index.html links to the detail page');
+check(readFileSync(join(root, 'details.html'), 'utf8').includes('index.html'),
+  'details.html links back to the overview');
+
+for (const f of [
+  'assets/js/data.js', 'assets/js/model.js', 'assets/js/state.js',
+  'assets/js/overview.js', 'assets/js/details.js', 'assets/css/styles.css', '.nojekyll',
+]) {
+  check(existsSync(join(root, f)), `${f} is present`);
 }
 
 /* ------------------------------------------------------------------ */
