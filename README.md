@@ -1,5 +1,7 @@
 # DreamPrice
 
+[![Deploy](https://github.com/ETOgaosion/DreamPrice/actions/workflows/deploy.yml/badge.svg)](https://github.com/ETOgaosion/DreamPrice/actions/workflows/deploy.yml)
+
 **[dreamprice — what the dream actually costs →](https://etogaosion.github.io/DreamPrice/)**
 
 Six assets across three countries, costed line by line from primary sources, and priced per year,
@@ -54,6 +56,7 @@ Static site, no build step, no dependencies.
 
 ```sh
 python3 -m http.server 8000   # then open http://localhost:8000
+node scripts/check.mjs        # validate the model and data
 ```
 
 ## Layout
@@ -64,7 +67,29 @@ assets/css/styles.css
 assets/js/data.js     researched figures, sources and caveats
 assets/js/model.js    cost engine, FX, year-by-year schedule
 assets/js/app.js      rendering and controls
+scripts/check.mjs     pre-deploy validation
+.github/workflows/deploy.yml
 ```
+
+## CI
+
+Every push to `main` runs three jobs; a pull request runs only the first.
+
+**Validate** walks every asset against every variant, scenario, per-asset input extreme and horizon —
+about 220,000 assertions in half a second. It checks that each line item is finite and non-negative,
+carries a known category, and cites a source that exists in the registry; that each asset's inputs
+default to legal values; that FX conversion round-trips losslessly; and that every element `app.js`
+writes into actually exists in `index.html`. It also asserts **scenario ordering**: the optimistic case
+must cost less than the realistic one, which must cost less than the pessimistic one. That last check
+exists because it caught a real bug — the R35's appreciation ranges were inverted, which made the
+pessimistic scenario come out cheapest.
+
+**Deploy** publishes to GitHub Pages via `actions/deploy-pages`, uploading only `index.html`,
+`assets/` and `.nojekyll`.
+
+**Verify** then fetches the live URL and confirms the page and all four asset files return 200 and the
+markup still contains its entry points — because deploying successfully and rendering correctly are
+different things.
 
 To change an assumption, edit `data.js` — it is deliberately the only file with numbers in it. Ranges
 are `{low, base, high}` where `low` is the optimistic case.

@@ -1,0 +1,82 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # There is no build step, so this is the only gate. It walks every asset
+      # against every variant, scenario, currency and horizon, asserts each line
+      # item is finite and cites a registered source, and checks that the
+      # optimistic case really is cheaper than the pessimistic one.
+      - name: Check the cost model and data
+        run: node scripts/check.mjs
+
+      - name: Assemble the site
+        run: |
+          mkdir -p _site
+          cp index.html .nojekyll _site/
+          cp -r assets _site/
+          test -f _site/index.html
+          test -f _site/assets/js/data.js
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to Pages
+    # A pull request gets validated, but only main gets published.
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  verify:
+    name: Verify the live site
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      # Deploying successfully and rendering correctly are different things.
+      # Fetch what the world actually sees and confirm the entry points are there.
+      - name: Fetch and inspect the published page
+        run: |
+          set -euo pipefail
+          base="https://etogaosion.github.io/DreamPrice"
+          for path in "/" "/assets/css/styles.css" "/assets/js/app.js" "/assets/js/data.js" "/assets/js/model.js"; do
+            code=$(curl -sS -o /tmp/body -w '%{http_code}' --retry 5 --retry-delay 10 --retry-all-errors "${base}${path}")
+            echo "${code}  ${path}"
+            test "$code" = "200"
+          done
+          curl -sS "${base}/" -o /tmp/index.html
+          grep -q 'id="assets"' /tmp/index.html
+          grep -q 'assets/js/app.js' /tmp/index.html
+          echo "Live at ${base}/"
