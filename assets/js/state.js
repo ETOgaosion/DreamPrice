@@ -19,7 +19,6 @@ export function createState() {
     scenario: 'base',
     years: 5,
     inflation: 0.02,
-    includeCapital: true,
     variants: {},
     inputs: {},
     enabled: {},
@@ -51,7 +50,6 @@ export function loadState() {
   if (SCENARIOS.includes(stored.scenario)) state.scenario = stored.scenario;
   if (Number.isFinite(stored.years)) state.years = Math.min(15, Math.max(1, Math.round(stored.years)));
   if (Number.isFinite(stored.inflation)) state.inflation = Math.min(0.08, Math.max(0, stored.inflation));
-  if (typeof stored.includeCapital === 'boolean') state.includeCapital = stored.includeCapital;
 
   for (const asset of ASSETS) {
     if (asset.variants.some((v) => v.id === stored.variants?.[asset.id])) {
@@ -131,12 +129,6 @@ export function bindGlobalControls(state, rerender) {
       if (inflationOut) inflationOut.textContent = `${Number(inflation.value).toFixed(1)}%`;
       commit();
     });
-  }
-
-  const capital = $('#capital');
-  if (capital) {
-    capital.checked = state.includeCapital;
-    capital.addEventListener('change', () => { state.includeCapital = capital.checked; commit(); });
   }
 
   const reset = $('#reset');

@@ -14,7 +14,7 @@ import { dirname, resolve, join } from 'node:path';
 
 import { ASSETS, CATEGORIES, CAVEATS, FX, LUXURY_TAX_THRESHOLD_EX_VAT, nevPurchaseTax, SRC } from '../assets/js/data.js';
 import {
-  categoryBreakdown, convert, defaultInputs, evaluateAll, fmt, PERIODS, portfolio, variantOf,
+  categoryBreakdown, convert, defaultInputs, evaluate, evaluateAll, fmt, PERIODS, portfolio, variantOf,
 } from '../assets/js/model.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -126,7 +126,7 @@ let itemsSeen = 0;
 const baseState = () => {
   const s = {
     currency: 'CNY', scenario: 'base', years: 5, inflation: 0.02,
-    includeCapital: true, variants: {}, inputs: {}, enabled: {},
+    variants: {}, inputs: {}, enabled: {},
   };
   for (const a of ASSETS) {
     s.variants[a.id] = a.defaultVariant;
@@ -181,40 +181,53 @@ for (const asset of ASSETS) {
               }
             }
 
-            for (const key of ['upFront', 'runningYear1', 'trueTotal', 'cashTotal', 'finalResidual']) {
+            for (const key of ['upFront', 'annualRunning', 'totalRunning', 'finalResidual']) {
               check(Number.isFinite(r[key]), `${where}: ${key} is finite`, String(r[key]));
             }
-            /* The four periods must be internally consistent — a quarter is a
-               quarter of a year, a month a twelfth, whichever view is selected. */
-            for (const view of ['all', 'cash']) {
-              const y = r.perYear[view];
-              check(Number.isFinite(y), `${where}: perYear.${view} is finite`);
-              check(Math.abs(r.perQuarter[view] - y / 4) < 1e-6, `${where}: perQuarter.${view} == perYear/4`);
-              check(Math.abs(r.perMonth[view] - y / 12) < 1e-6, `${where}: perMonth.${view} == perYear/12`);
-              check(Math.abs(r.perDay[view] - y / 365.25) < 1e-6, `${where}: perDay.${view} == perYear/365.25`);
-            }
+            /*
+             * A car is bought once and then kept. So the per-year figure must be
+             * exactly one year of running cost — never the purchase amortised,
+             * and never an average over the horizon.
+             */
+            check(Math.abs(r.perYear - r.annualRunning) < 1e-6,
+              `${where}: perYear is one year of running cost, not an average`);
+            check(Math.abs(r.perQuarter - r.perYear / 4) < 1e-6, `${where}: perQuarter == perYear/4`);
+            check(Math.abs(r.perMonth - r.perYear / 12) < 1e-6, `${where}: perMonth == perYear/12`);
+            check(Math.abs(r.perDay - r.perYear / 365.25) < 1e-6, `${where}: perDay == perYear/365.25`);
+            /* The horizon must not move the headline. Only the projection. */
+            const longer = evaluate(asset, { ...state, years: years + 7 });
+            check(Math.abs(longer.perYear - r.perYear) < 1e-6,
+              `${where}: the horizon does not change the per-year cost`);
+            /* Nothing in the annual bucket may be a capital loss. */
+            check(!r.annual.some((i) => i.category === 'capital'),
+              `${where}: no depreciation line in the annual costs`);
+            check(r.schedule.every((row) => row.capital === undefined),
+              `${where}: the projection carries no capital column`);
             check(r.refundable <= r.upFront + 0.01, `${where}: refundable does not exceed up-front`);
             check(r.schedule.length === years, `${where}: schedule has ${years} rows`, String(r.schedule.length));
 
             for (const currency of CURRENCIES) {
-              for (const includeCapital of [true, false]) {
-                const p = portfolio(results, currency, includeCapital, state.enabled);
-                for (const key of ['upFront', 'refundable', 'alreadyPaid', 'perYear', 'perQuarter', 'perMonth', 'perDay', 'total']) {
+              {
+                const p = portfolio(results, currency, state.enabled);
+                for (const key of ['upFront', 'refundable', 'alreadyPaid', 'perYear', 'perQuarter', 'perMonth', 'perDay', 'totalRunning']) {
                   check(Number.isFinite(p[key]), `${where}/${currency}: portfolio ${key} is finite`, String(p[key]));
                 }
                 /* Each period table's rows must sum to the total it prints. */
                 for (const period of PERIODS) {
                   const rows = ASSETS
                     .filter((a) => state.enabled[a.id])
-                    .reduce((t, a) => t + convert(
-                      results[a.id][period.id][includeCapital ? 'all' : 'cash'], a.currency, currency), 0);
+                    .reduce((t, a) => t + convert(results[a.id][period.id], a.currency, currency), 0);
                   check(Math.abs(rows - p[period.id]) < 0.01,
                     `${where}/${currency}: ${period.id} rows sum to the printed total`,
                     `${rows} vs ${p[period.id]}`);
                 }
-                const cats = categoryBreakdown(r, currency, includeCapital);
+                const cats = categoryBreakdown(r, currency);
                 check(cats.every(([, amt]) => Number.isFinite(amt) && amt > 0),
                   `${where}/${currency}: chart segments are positive and finite`);
+                /* The chart shows running cost, so it must equal the annual total. */
+                const chartSum = cats.reduce((t, [, amt]) => t + amt, 0);
+                check(Math.abs(chartSum - convert(r.annualRunning, asset.currency, currency)) < 0.01,
+                  `${where}/${currency}: chart segments sum to the annual running cost`);
                 check(typeof fmt(p.perDay, currency) === 'string', `${where}/${currency}: formats without throwing`);
                 combos++;
               }
@@ -242,7 +255,7 @@ for (const asset of ASSETS) {
       const state = baseState();
       state.variants[asset.id] = variant.id;
       state.scenario = scenario;
-      perYear[scenario] = evaluateAll(state)[asset.id].perYear.all;
+      perYear[scenario] = evaluateAll(state)[asset.id].perYear;
     }
     check(perYear.low <= perYear.base + 1e-6,
       `${asset.id}/${variant.id}: optimistic <= realistic`,

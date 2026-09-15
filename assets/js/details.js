@@ -119,7 +119,7 @@ function renderChart(results) {
   const cur = state.currency;
   const rows = ASSETS.map((a) => {
     const r = results[a.id];
-    const cats = categoryBreakdown(r, cur, state.includeCapital);
+    const cats = categoryBreakdown(r, cur);
     const total = cats.reduce((t, [, v]) => t + v, 0);
     return { asset: a, cats, total, on: state.enabled[a.id] };
   });
@@ -159,7 +159,6 @@ function renderAssets(results) {
 function card(asset, r) {
   const cur = asset.currency;
   const disp = state.currency;
-  const key = state.includeCapital ? 'all' : 'cash';
   const c = el('article', 'card' + (state.enabled[asset.id] ? '' : ' disabled'));
   c.style.setProperty('--card-accent', asset.accent);
 
@@ -257,8 +256,8 @@ function card(asset, r) {
     /* The same four periods the front page is built around. */
     ...PERIODS.map((p) => [
       p.label,
-      show(r[p.id][key]),
-      cross ? `≈ ${fmt(convert(r[p.id][key], cur, disp), disp, { digits: 0 })}` : '',
+      show(r[p.id]),
+      cross ? `≈ ${fmt(convert(r[p.id], cur, disp), disp, { digits: 0 })}` : '',
     ]),
   ];
   for (const [lbl, val, alt] of items) {
@@ -280,8 +279,8 @@ function card(asset, r) {
     true, bands.oneTime,
   ));
   c.append(lineBlock(
-    `Every year — ${fmtCompact(r.runningYear1, cur)}`,
-    r.annual, cur, r.runningYear1, 'Year-one running cost', false, bands.annual,
+    `Every year — ${fmtCompact(r.annualRunning, cur)}`,
+    r.annual, cur, r.annualRunning, 'Cost to keep it, per year', false, bands.annual,
   ));
   c.append(yearBlock(r, cur));
 
@@ -342,51 +341,44 @@ function yearBlock(r, cur) {
   const body = el('div', 'body');
   const table = el('table', 'yrs');
   table.innerHTML =
-    `<thead><tr><th>Year</th><th>Running</th>` +
-    (isCar ? `<th>${r.variant.appr ? 'Value change' : 'Depreciation'}</th><th>Total</th><th class="dim">Car worth</th>` : `<th>Total</th>`) +
+    `<thead><tr><th>Year</th><th>Cost to keep</th><th>Spent so far</th>` +
+    (isCar ? `<th class="dim">Worth if sold</th>` : '') +
     `</tr></thead>`;
   const tb = el('tbody');
   for (const row of r.schedule) {
     const tr = el('tr');
-    let html = `<td>${row.year}</td><td>${fmt(row.running, cur, { digits: 0 })}</td>`;
-    if (isCar) {
-      const sign = row.capital < 0 ? '+' : '';
-      html += `<td>${sign}${fmt(-row.capital, cur, { digits: 0 })}</td>`;
-      html += `<td>${fmt(row.total, cur, { digits: 0 })}</td>`;
-      html += `<td class="dim">${fmtCompact(row.residual, cur)}</td>`;
-    } else {
-      html += `<td>${fmt(row.total, cur, { digits: 0 })}</td>`;
-    }
-    tr.innerHTML = html;
+    tr.innerHTML =
+      `<td>${row.year}</td>` +
+      `<td>${fmt(row.running, cur, { digits: 0 })}</td>` +
+      `<td>${fmt(row.cumulative, cur, { digits: 0 })}</td>` +
+      (isCar ? `<td class="dim">${fmtCompact(row.residual, cur)}</td>` : '');
     tb.append(tr);
   }
   table.append(tb);
   const tf = el('tfoot');
   tf.innerHTML =
     `<tr><td>Total</td><td>${fmt(r.totalRunning, cur, { digits: 0 })}</td>` +
-    (isCar
-      ? `<td>${r.totalCapital < 0 ? '+' : ''}${fmt(-r.totalCapital, cur, { digits: 0 })}</td><td>${fmt(r.trueTotal, cur, { digits: 0 })}</td><td class="dim">${fmtCompact(r.finalResidual, cur)}</td>`
-      : `<td>${fmt(r.trueTotal, cur, { digits: 0 })}</td>`) +
+    `<td>${fmt(r.totalRunning, cur, { digits: 0 })}</td>` +
+    (isCar ? `<td class="dim">${fmtCompact(r.finalResidual, cur)}</td>` : '') +
     `</tr>`;
   table.append(tf);
   body.append(table);
 
+  /* Resale value rides alongside as context. It is never a cost column. */
   const notes = [];
-  if (isCar && r.variant.appr) {
-    const rate = r.variant.appr[state.scenario] ?? r.variant.appr.base;
-    notes.push(
-      `Value change ${rate >= 0 ? '+' : ''}${(rate * 100).toFixed(0)}%/yr. Asking prices are rising, but trade-in ` +
-      `prices are flat — you buy at retail and sell at trade, a 26–30% gap.`);
-  } else if (isCar && r.variant.dep) {
-    const rate = r.variant.dep[state.scenario] ?? r.variant.dep.base;
-    notes.push(
-      `Loses ${(rate * 100).toFixed(0)}% of its value each year${rate < 0 ? ' — negative, so it gains' : ''}. ` +
-      `A typical 6-year-old Norwegian car loses about 10%/yr; the old V8 holds value only with repairs on paper.`);
-  } else if (isCar) {
-    notes.push('Only the car loses value; taxes and fees are gone at once. "Car worth" is resale value.');
+  if (isCar) {
+    notes.push('"Worth if sold" is context, not a cost \u2014 you paid for the car once, up front.');
+    const rate = r.variant.appr
+      ? (r.variant.appr[state.scenario] ?? r.variant.appr.base)
+      : r.variant.dep
+        ? -(r.variant.dep[state.scenario] ?? r.variant.dep.base)
+        : null;
+    if (rate !== null) {
+      notes.push(`Resale tracked at ${rate >= 0 ? '+' : ''}${(rate * 100).toFixed(0)}% a year in this scenario.`);
+    }
   } else {
     const e = r.asset.escalation[state.scenario] ?? r.asset.escalation.base;
-    notes.push(`Rent rises ${(e * 100).toFixed(1)}% a year here.`);
+    notes.push(`Rent rises ${(e * 100).toFixed(1)}% a year here; other lines follow the inflation slider.`);
   }
   for (const n of notes) body.append(el('p', 'hint', esc(n)));
   d.append(body);

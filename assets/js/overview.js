@@ -22,15 +22,14 @@ const money = (amount, currency) =>
 function render() {
   const results = evaluateAll(state);
   const cur = state.currency;
-  const key = state.includeCapital ? 'all' : 'cash';
   const included = ASSETS.filter((a) => state.enabled[a.id]);
-  const p = portfolio(results, cur, state.includeCapital, state.enabled);
+  const p = portfolio(results, cur, state.enabled);
 
   /* One table per period. Rows are the assets, sorted dearest first, so the
      thing you should look at is always at the top. */
   $('#periods').replaceChildren(...PERIODS.map((period) => {
     const rows = included
-      .map((a) => ({ a, amount: convert(results[a.id][period.id][key], a.currency, cur) }))
+      .map((a) => ({ a, amount: convert(results[a.id][period.id], a.currency, cur) }))
       .sort((x, y) => y.amount - x.amount);
     const total = p[period.id];
     const max = rows.length ? rows[0].amount : 1;
@@ -91,8 +90,8 @@ function render() {
   const chips = [
     `${included.length}/${ASSETS.length} assets`,
     { low: 'Optimistic', base: 'Realistic', high: 'Pessimistic' }[state.scenario],
-    `${state.years}-year average`,
-    state.includeCapital ? 'Depreciation in' : 'Depreciation out',
+    'Running costs only',
+    'Today\u2019s prices',
   ];
   $('#periods').insertAdjacentHTML('beforeend',
     `<p class="periods-note">${chips.map((c) => `<span>${esc(c)}</span>`).join('')}</p>`);

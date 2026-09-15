@@ -25,6 +25,12 @@ Two pages, deliberately.
 with a tint behind each row showing its share, and a total. The one-off cost sits separately below,
 because it is not a period and folding it into the tables would make them lie.
 
+There are exactly two buckets, and depreciation is in neither. You buy a car once, and after that it
+costs servicing, repairs, insurance, fuel, tax, tyres and parking to keep. A car being worth less later
+is a change in what you own, not a bill that arrives — so the purchase is never amortised across the
+years, and the per-year figure is one year of running cost rather than an average. Moving the horizon
+slider does not change it. Resale value still appears on the detail page, clearly marked as context.
+
 **The detail page is where you configure and interrogate.** Pick a trim, a model year, a district and a
 mileage. Every one of the 79 line items carries a `DATA ↗` link straight to its source, and hovering
 the row opens a card with the evidence: the figure, its low/base/high band across the three scenarios,
@@ -34,7 +40,7 @@ source list.
 
 Settings live in `localStorage`, so anything you change on one page is already applied on the other.
 Three scenarios (optimistic / realistic / pessimistic) drive every range at once, and a horizon slider
-runs the year-by-year schedule including depreciation.
+projects the year-by-year running cost as inflation and rent escalation bite.
 
 Both cars are budgeted second-hand at roughly ¥500,000 CNY each — about ¥11.4M in Tokyo and
 NOK 695,000 in Tromsø.
@@ -96,7 +102,9 @@ Every push to `main` runs three jobs; a pull request runs only the first.
 **Validate** walks every asset against every variant, scenario, per-asset input extreme and horizon —
 about 300,000 assertions in half a second. It checks that each line item is finite and non-negative,
 carries a known category, links to a source that exists in the registry, and ships at least two
-underlying data points for the hover card; that each asset's inputs default to legal values; that FX conversion round-trips losslessly; that a quarter really is a year
+underlying data points for the hover card; that each asset's inputs default to legal values; that the
+per-year figure equals one year of running cost and does not move when the horizon changes; that no
+depreciation line ever reaches the annual bucket; that FX conversion round-trips losslessly; that a quarter really is a year
 divided by four and each period table's rows sum to the total it prints; and that every element each
 page's script writes into actually exists in that page's markup, with the two pages linking to each
 other. It also asserts **scenario ordering**: the optimistic case must cost less than the realistic one,
