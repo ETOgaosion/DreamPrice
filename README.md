@@ -26,8 +26,11 @@ with a tint behind each row showing its share, and a total. The one-off cost sit
 because it is not a period and folding it into the tables would make them lie.
 
 **The detail page is where you configure and interrogate.** Pick a trim, a model year, a district and a
-mileage; every line item expands to show what it is, where the number came from, and where it is shaky.
-It also carries the composition chart, the caveats and the source list.
+mileage. Every one of the 79 line items carries a `DATA ↗` link straight to its source, and hovering
+the row opens a card with the evidence: the figure, its low/base/high band across the three scenarios,
+the arithmetic that produced it, the raw sourced numbers it was built from, and whether it is taken
+directly from a source or derived. The page also carries the composition chart, the caveats and the
+source list.
 
 Settings live in `localStorage`, so anything you change on one page is already applied on the other.
 Three scenarios (optimistic / realistic / pessimistic) drive every range at once, and a horizon slider
@@ -92,8 +95,8 @@ Every push to `main` runs three jobs; a pull request runs only the first.
 
 **Validate** walks every asset against every variant, scenario, per-asset input extreme and horizon —
 about 300,000 assertions in half a second. It checks that each line item is finite and non-negative,
-carries a known category, and cites a source that exists in the registry; that each asset's inputs
-default to legal values; that FX conversion round-trips losslessly; that a quarter really is a year
+carries a known category, links to a source that exists in the registry, and ships at least two
+underlying data points for the hover card; that each asset's inputs default to legal values; that FX conversion round-trips losslessly; that a quarter really is a year
 divided by four and each period table's rows sum to the total it prints; and that every element each
 page's script writes into actually exists in that page's markup, with the two pages linking to each
 other. It also asserts **scenario ordering**: the optimistic case must cost less than the realistic one,

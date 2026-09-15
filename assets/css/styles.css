@@ -353,6 +353,23 @@ details.block .body { padding: 0.3rem 1.5rem 1.4rem; }
   font-size: 0.85rem; line-height: 1.6; color: var(--ink-dim); margin: 0.45rem 0 0;
   border-left: 2px solid var(--line-2); padding-left: 0.75rem;
 }
+.li { border-radius: 8px; transition: background 0.12s ease; }
+.li:hover, .li:focus-visible {
+  background: rgba(255, 255, 255, 0.035);
+  outline: none; cursor: help;
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* A visible link on every calculated line. */
+.li-link {
+  flex: 0 0 auto; border: 1px solid var(--line-2); border-radius: 999px;
+  padding: 0.05rem 0.5rem; font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint);
+  background: var(--panel); text-decoration: none;
+}
+.li-link::after { content: ' ↗'; letter-spacing: 0; }
+.li-link:hover { color: #0b0c12; background: var(--accent); border-color: var(--accent); }
+
 .li-src { font-size: 0.72rem; margin-top: 0.35rem; }
 .li-src a { color: var(--ink-faint); border-bottom-color: transparent; }
 .li-src a:hover { color: var(--accent); }
@@ -391,6 +408,58 @@ table.yrs .dim { color: var(--ink-faint); }
 .sources a { font-size: 0.8rem; color: var(--ink-dim); border-bottom-color: transparent; display: block; padding: 0.25rem 0; }
 .sources a:hover { color: var(--accent); }
 .sources a::before { content: '→ '; color: var(--ink-faint); }
+
+/* ---------- hover card: the evidence behind a number ---------- */
+.hovercard {
+  position: fixed; z-index: 90; width: min(400px, calc(100vw - 20px));
+  background: #10121b; border: 1px solid var(--line-2); border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); padding: 0.9rem 1rem;
+  pointer-events: none; font-size: 0.8rem; line-height: 1.5;
+}
+.hovercard[hidden] { display: none; }
+.hc-title {
+  font-weight: 700; font-size: 0.86rem; margin-bottom: 0.5rem; line-height: 1.35;
+  padding-bottom: 0.5rem; border-bottom: 1px solid var(--line);
+}
+.hc-amt {
+  font-family: var(--mono); font-size: 1.3rem; font-weight: 600; color: var(--accent);
+  letter-spacing: -0.02em; display: flex; align-items: baseline; gap: 0.5rem;
+}
+.hc-amt span { font-family: Inter, sans-serif; font-size: 0.72rem; color: var(--ink-faint); font-weight: 500; }
+.hc-sec {
+  font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-faint); font-weight: 700; margin: 0.8rem 0 0.35rem;
+}
+.hc-band, .hc-facts { width: 100%; border-collapse: collapse; }
+.hc-band td, .hc-facts td { padding: 0.2rem 0; vertical-align: top; }
+.hc-band td:last-child, .hc-facts td:last-child {
+  text-align: right; font-family: var(--mono); font-size: 0.78rem; white-space: nowrap;
+  padding-left: 0.75rem;
+}
+.hc-band td:first-child, .hc-facts td:first-child { color: var(--ink-dim); }
+.hc-band tr.on td { color: var(--accent); font-weight: 600; }
+.hc-flat { font-size: 0.74rem; color: var(--ink-faint); margin-top: 0.4rem; }
+.hc-formula {
+  font-family: var(--mono); font-size: 0.76rem; color: var(--ink);
+  background: rgba(255, 255, 255, 0.05); border-radius: 7px; padding: 0.45rem 0.6rem;
+  word-break: break-word;
+}
+.hc-conf {
+  margin-top: 0.75rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 0.22rem 0.5rem; border-radius: 5px; display: inline-block;
+}
+.hc-conf.src { background: rgba(52, 211, 153, 0.14); color: #6ee7b7; }
+.hc-conf.est { background: rgba(251, 146, 60, 0.16); color: #fdba74; }
+.hc-src {
+  margin-top: 0.7rem; padding-top: 0.6rem; border-top: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 0.2rem;
+}
+.hc-src span { font-size: 0.75rem; color: var(--ink-dim); }
+.hc-src code { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-faint); word-break: break-all; }
+.hc-src em { font-style: normal; font-size: 0.68rem; color: var(--accent); font-weight: 600; }
+
+/* Touch devices have no hover, so the card would only ever flash. */
+@media (hover: none) { .hovercard { display: none !important; } }
 
 /* ---------- narrow screens ---------- */
 @media (max-width: 680px) {

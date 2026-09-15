@@ -131,6 +131,26 @@ function nextResidual(asset, v, ctx, current, price, year) {
 }
 
 /*
+ * The same line items priced under all three scenarios, zipped by position.
+ *
+ * Every item therefore gets a low/base/high band to show on hover without
+ * anyone having to type one in. Position is stable across scenarios because the
+ * item arrays only ever branch on inputs, never on the scenario.
+ */
+export function scenarioBands(asset, state) {
+  const bands = { oneTime: [], annual: [] };
+  for (const scenario of ['low', 'base', 'high']) {
+    const r = evaluate(asset, { ...state, scenario });
+    for (const section of ['oneTime', 'annual']) {
+      r[section].forEach((item, i) => {
+        (bands[section][i] ||= {})[scenario] = item.amount;
+      });
+    }
+  }
+  return bands;
+}
+
+/*
  * Category rollup for the chart, converted to the display currency.
  * Scaled so the segments sum to the AVERAGE annual cost over the horizon,
  * matching the per-year headline rather than year one alone.

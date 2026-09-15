@@ -2,7 +2,7 @@
 
 import { ASSETS, CATEGORIES, CAVEATS, SRC } from './data.js';
 import {
-  categoryBreakdown, convert, evaluateAll, fmt, fmtCompact, PERIODS,
+  categoryBreakdown, convert, evaluateAll, fmt, fmtCompact, PERIODS, scenarioBands,
 } from './model.js';
 import { bindGlobalControls, loadState, saveState } from './state.js';
 
@@ -22,6 +22,92 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 function srcLink(src) {
   if (!src) return '';
   return `<div class="li-src"><a href="${src.u}" target="_blank" rel="noopener">${esc(src.t)}</a></div>`;
+}
+
+/* ---------------- hover card ----------------
+ * One floating element reused by every line, rather than 80 tooltips in the
+ * DOM. It follows the pointer and flips to stay on screen, and it also opens on
+ * keyboard focus so the evidence is reachable without a mouse.
+ */
+const hoverCard = el('div', 'hovercard');
+hoverCard.setAttribute('role', 'tooltip');
+hoverCard.hidden = true;
+document.body.append(hoverCard);
+
+const SCENARIO_LABEL = { low: 'Optimistic', base: 'Realistic', high: 'Pessimistic' };
+
+function buildEvidence(item, band, currency) {
+  const rows = [];
+
+  if (item.informational) {
+    rows.push('<div class="hc-amt">Context only — not added to any total</div>');
+  } else {
+    rows.push(`<div class="hc-amt">${fmt(item.amount, currency, { digits: 0 })}` +
+      `<span>${item.frequencyLabel || ''}</span></div>`);
+  }
+
+  /* The low/base/high band, derived rather than authored. */
+  if (band) {
+    const spread = Math.abs(band.high - band.low) > 0.5;
+    if (spread) {
+      rows.push('<div class="hc-sec">Range across scenarios 三档区间</div>');
+      rows.push('<table class="hc-band">' + ['low', 'base', 'high'].map((s) =>
+        `<tr class="${s === state.scenario ? 'on' : ''}"><td>${SCENARIO_LABEL[s]}</td>` +
+        `<td>${fmt(band[s], currency, { digits: 0 })}</td></tr>`).join('') + '</table>');
+    } else if (!item.informational) {
+      rows.push('<div class="hc-flat">Fixed — same in every scenario</div>');
+    }
+  }
+
+  if (item.formula) {
+    rows.push('<div class="hc-sec">How it is worked out 算法</div>');
+    rows.push(`<div class="hc-formula">${esc(item.formula)}</div>`);
+  }
+
+  if (item.facts?.length) {
+    rows.push('<div class="hc-sec">Underlying data 原始数据</div>');
+    rows.push('<table class="hc-facts">' + item.facts.map(([k, v]) =>
+      `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('') + '</table>');
+  }
+
+  rows.push(`<div class="hc-conf ${item.est ? 'est' : 'src'}">` +
+    (item.est ? 'Derived estimate — see the note' : 'Taken directly from the source') + '</div>');
+
+  if (item.src) {
+    rows.push(`<div class="hc-src"><span>${esc(item.src.t)}</span>` +
+      `<code>${esc(item.src.u.replace(/^https?:\/\//, '').slice(0, 64))}</code>` +
+      `<em>Click the link to open →</em></div>`);
+  }
+  return rows.join('');
+}
+
+function placeCard(ev) {
+  const pad = 14;
+  const { innerWidth: vw, innerHeight: vh } = window;
+  const r = hoverCard.getBoundingClientRect();
+  let x = ev.clientX + pad;
+  let y = ev.clientY + pad;
+  if (x + r.width > vw - 8) x = Math.max(8, ev.clientX - r.width - pad);
+  if (y + r.height > vh - 8) y = Math.max(8, vh - r.height - 8);
+  hoverCard.style.left = `${x}px`;
+  hoverCard.style.top = `${y}px`;
+}
+
+function attachHover(node, item, band, currency) {
+  const show = (ev) => {
+    hoverCard.innerHTML = `<div class="hc-title">${esc(item.label)}</div>` +
+      buildEvidence(item, band, currency);
+    hoverCard.hidden = false;
+    placeCard(ev.clientX !== undefined && ev.clientX !== 0
+      ? ev
+      : (() => { const b = node.getBoundingClientRect(); return { clientX: b.left, clientY: b.bottom }; })());
+  };
+  const hide = () => { hoverCard.hidden = true; };
+  node.addEventListener('mouseenter', show);
+  node.addEventListener('mousemove', (ev) => { if (!hoverCard.hidden) placeCard(ev); });
+  node.addEventListener('mouseleave', hide);
+  node.addEventListener('focusin', show);
+  node.addEventListener('focusout', hide);
 }
 
 /* Persist and redraw. Every per-asset control routes through here so the
@@ -184,28 +270,29 @@ function card(asset, r) {
   c.append(kpis);
 
   /* breakdowns */
+  const bands = scenarioBands(asset, state);
   c.append(lineBlock(
     asset.owned
       ? `Already paid 已付 — ${fmtCompact(r.upFront, cur)}`
       : `Up-front — ${fmtCompact(r.upFront, cur)}`,
     r.oneTime, cur, r.upFront,
     asset.owned ? 'Total 落地价 paid' : 'Total at purchase / move-in',
-    true,
+    true, bands.oneTime,
   ));
   c.append(lineBlock(
     `Every year — ${fmtCompact(r.runningYear1, cur)}`,
-    r.annual, cur, r.runningYear1, 'Year-one running cost', false,
+    r.annual, cur, r.runningYear1, 'Year-one running cost', false, bands.annual,
   ));
   c.append(yearBlock(r, cur));
 
   return c;
 }
 
-function lineBlock(summary, items, cur, total, totalLabel, isUpFront) {
+function lineBlock(summary, items, cur, total, totalLabel, isUpFront, bands) {
   const d = el('details', 'block');
   d.append(el('summary', null, esc(summary)));
   const body = el('div', 'body');
-  for (const item of items) {
+  items.forEach((item, i) => {
     const li = el('div', 'li');
     const top = el('div', 'li-top');
     const pills =
@@ -213,14 +300,31 @@ function lineBlock(summary, items, cur, total, totalLabel, isUpFront) {
       (item.refundable ? ' <span class="pill ref">refundable</span>' : '') +
       (item.informational ? ' <span class="pill info">context</span>' : '');
     top.append(el('div', 'li-lbl', esc(item.label) + pills));
+
+    /* A real link on every line, not a grey afterthought at the bottom. */
+    if (item.src) {
+      const a = el('a', 'li-link');
+      a.href = item.src.u;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.title = item.src.t;
+      a.setAttribute('aria-label', `Source: ${item.src.t}`);
+      a.innerHTML = '<span>data</span>';
+      top.append(a);
+    }
+
     const amt = el('div', 'li-amt' + (item.amount === 0 || item.informational ? ' zero' : ''),
       item.informational ? '—' : fmt(item.amount, cur, { digits: 0 }));
     top.append(amt);
     li.append(top);
     if (item.note) li.append(el('p', 'li-note', esc(item.note)));
     if (item.src) li.insertAdjacentHTML('beforeend', srcLink(item.src));
+
+    /* Hover anywhere on the row to see the evidence behind the number. */
+    li.tabIndex = 0;
+    attachHover(li, item, bands?.[i], cur);
     body.append(li);
-  }
+  });
   const t = el('div', 'li-total');
   t.innerHTML = `<span>${esc(totalLabel)}</span><span>${fmt(total, cur, { digits: 0 })}</span>`;
   body.append(t);

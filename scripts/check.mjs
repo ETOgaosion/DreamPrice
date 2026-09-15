@@ -161,8 +161,24 @@ for (const asset of ASSETS) {
               if (!check(Number.isFinite(item.amount), `${where}: "${item.label}" is finite`, String(item.amount))) continue;
               check(item.amount >= 0, `${where}: "${item.label}" is not negative`, String(item.amount));
               check(CATEGORIES[item.category], `${where}: "${item.label}" has a known category`, item.category);
-              check(!item.src || SRC_VALUES.has(item.src), `${where}: "${item.label}" cites a registered source`, item.label);
               check(typeof item.label === 'string' && item.label.length > 0, `${where}: item has a label`);
+
+              /* Every calculated line must be clickable through to a source and
+                 must show its underlying data on hover. */
+              check(item.src && SRC_VALUES.has(item.src),
+                `${where}: "${item.label}" links to a registered source`, item.label);
+              check(item.facts?.length >= 2,
+                `${where}: "${item.label}" carries underlying data`, `${item.facts?.length ?? 0} facts`);
+              for (const fact of item.facts || []) {
+                check(Array.isArray(fact) && fact.length === 2
+                  && typeof fact[0] === 'string' && fact[0].length > 0
+                  && typeof fact[1] === 'string' && fact[1].length > 0,
+                  `${where}: "${item.label}" fact is a [label, value] pair`, JSON.stringify(fact));
+              }
+              if (item.formula) {
+                check(typeof item.formula === 'string' && item.formula.length > 5,
+                  `${where}: "${item.label}" formula is meaningful`);
+              }
             }
 
             for (const key of ['upFront', 'runningYear1', 'trueTotal', 'cashTotal', 'finalResidual']) {
