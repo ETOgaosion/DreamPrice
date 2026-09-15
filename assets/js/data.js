@@ -269,10 +269,7 @@ const emeya = {
   place: 'Shenzhen, China',
   currency: 'CNY',
   accent: '#f5c542',
-  blurb:
-    '已购入 — bought, not shopped for. A 600 SE invoiced at ¥638,000 including options, which is ' +
-    '¥50,000 over the ¥588,000 指导价. Options are part of the purchase-tax base, and because the ' +
-    'NEV relief is capped they are taxed at the full 10%.',
+  blurb: 'Bought: a 600 SE invoiced at ¥638,000, options included. Options are taxed too.',
   variants: [
     {
       id: '600se',
@@ -289,11 +286,10 @@ const emeya = {
   inputs: [
     { id: 'invoice', label: '成交价 Invoice total', unit: 'CNY incl. VAT', type: 'number',
       min: 588000, max: 900000, step: 1000, def: 638000,
-      hint: 'What you actually paid the dealer, VAT included, options and dealer-fitted accessories ' +
-            'included. This is the purchase-tax base — change it and every tax line recomputes.' },
+      hint: 'What you paid, VAT and options included. Tax recomputes.' },
     { id: 'km',      label: 'Distance driven', unit: 'km/year', type: 'range', min: 3000, max: 40000, step: 1000, def: 15000 },
     { id: 'chargeMix', label: 'Home charging share', unit: '%', type: 'range', min: 0, max: 100, step: 10, def: 40,
-      hint: 'A rented loft almost never allows a private wallbox, so the base case leans on public chargers.' },
+      hint: 'No wallbox in a rented loft, so mostly public charging.' },
   ],
   rates: { home: 0.70, public: 1.40 },
   /* Optimistic = holds value best. Base 3-yr residual lands at ~49%, between the observed
@@ -393,9 +389,7 @@ const loft = {
   place: 'Shenzhen, China',
   currency: 'CNY',
   accent: '#ff6b6b',
-  blurb:
-    'A high-ceiling duplex loft. The market is soft right now — institutional apartment yields fell ' +
-    '4.2% year-on-year in H1 2026 — so contractual 3–5% escalation clauses are negotiable.',
+  blurb: 'A high-ceiling duplex loft. The market is soft, so the rent rise is negotiable.',
   variants: [
     { id: 'nanshan', label: '南山 科技园 / 南油 — ¥8,000', rent: { low: 6800, base: 8000, high: 12000 }, sqm: 60, mgmt: 9,  src: SRC.loftNanshan },
     { id: 'futian',  label: '福田 中心 / 皇岗 — ¥11,000',  rent: { low: 9000, base: 11000, high: 15000 }, sqm: 57, mgmt: 9,  src: SRC.loftFutian },
@@ -458,10 +452,7 @@ const gtr = {
   place: 'Tokyo, Japan',
   currency: 'JPY',
   accent: '#ff4d6d',
-  blurb:
-    'A ¥500,000 CNY budget is about ¥11.4M, which reaches model years 2007–2016 — and one 2018 ' +
-    'facelift car. Mileage drives price far more than year. The trap is not the purchase: insurers ' +
-    'will only cover an early car for about half what you pay for it.',
+  blurb: 'Used, ~¥11.4M. Insurers will only cover an early car for half what you pay.',
   variants: [
     {
       id: 'early',
@@ -616,9 +607,7 @@ const tower = {
   place: 'Tokyo, Japan',
   currency: 'JPY',
   accent: '#7dd3fc',
-  blurb:
-    'Move-in cost is the shock: 4.5–5.5× monthly rent before you sleep there, of which only the 敷金 ' +
-    'comes back. Then a renewal fee every two years, forever.',
+  blurb: 'Move-in costs 4.5–5.5 months\u2019 rent, and only the 敷金 comes back.',
   variants: [
     { id: '1ldk_bay',   label: '1LDK — 豊洲 / 晴海 bayside — ¥250,000',   rent: { low: 200000, base: 250000, high: 300000 }, mgmt: 15000, src: SRC.suumoToyosu },
     { id: '1ldk_minato',label: '1LDK — 港区 / 渋谷区 — ¥290,000',         rent: { low: 250000, base: 290000, high: 340000 }, mgmt: 15000, src: SRC.rehouseTower },
@@ -699,10 +688,7 @@ const amg = {
   place: 'Tromsø, Norway',
   currency: 'NOK',
   accent: '#a78bfa',
-  blurb:
-    'Buying used in Norway is transformative: the engangsavgift was paid by the first owner and is ' +
-    'never re-levied, so your entire tax bill is 1,942–4,532 kr, once. At ~NOK 695,000 you can reach ' +
-    'a C 63 and an E 53 — the constraint is running cost and mechanical risk, not price.',
+  blurb: 'Used, so the big Norwegian car tax is already paid. You owe 1,942–4,532 kr, once.',
   variants: [
     {
       id: 'e53',
@@ -795,7 +781,7 @@ const amg = {
   inputs: [
     { id: 'km',    label: 'Distance driven', unit: 'km/year', type: 'range', min: 3000, max: 30000, step: 1000, def: 12000 },
     { id: 'tolls', label: 'Toll passages', unit: 'paid/month', type: 'range', min: 0, max: 80, step: 5, def: 40,
-      hint: '15 stations ring Tromsøya, covering the bridge, the airport and the university. Monthly cap is 80 paid passages.' },
+      hint: '15 stations ring the island. Capped at 80 a month.' },
     { id: 'heater', label: 'Block heater (motorvarmer)', type: 'select', def: 'yes',
       options: [{ v: 'yes', l: 'Fitted — DEFA WarmUp II, ~12,500 kr' }, { v: 'no', l: 'Not fitted — pay ~9% more for fuel' }] },
     { id: 'parking', label: 'Secure covered parking', type: 'select', def: 'none',
@@ -930,10 +916,7 @@ const arctic = {
   place: 'Northern Norway',
   currency: 'NOK',
   accent: '#38bdf8',
-  blurb:
-    'SSB does not publish Tromsø as its own rent zone — anyone quoting "SSB says 13,000 kr" is ' +
-    'extrapolating. Live FINN listings for an actual house are 22,000–36,000. And in Lofoten, several ' +
-    '"long-term" listings quietly end on 31 May so the owner can rent to tourists.',
+  blurb: 'Real listings for a house are 22,000–36,000 kr. In Lofoten many leases end on 31 May.',
   variants: [
     { id: 'tromso_house', label: 'Tromsø — small house, 3 bed — 23,000 kr', rent: { low: 22000, base: 23000, high: 36000 }, kwh: { low: 18000, base: 20000, high: 22000 }, seasonal: false, src: SRC.finnHamna },
     { id: 'tromso_apt',   label: 'Tromsø — 2–3 room apartment — 14,000 kr', rent: { low: 12000, base: 14000, high: 16000 }, kwh: { low: 9000, base: 11000, high: 13000 }, seasonal: false, src: SRC.ssbLmu },

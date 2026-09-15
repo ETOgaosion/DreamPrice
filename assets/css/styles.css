@@ -142,7 +142,6 @@ input[type='checkbox'] { accent-color: var(--accent); width: 15px; height: 15px;
   font-family: var(--mono); font-size: clamp(1.9rem, 4.6vw, 2.7rem); font-weight: 600;
   letter-spacing: -0.035em; line-height: 1.05; margin-top: 0.4rem; color: var(--accent);
 }
-.period-note { margin: 0.3rem 0 0; font-size: 0.78rem; color: var(--ink-faint); }
 
 .period table { width: 100%; border-collapse: collapse; }
 .period td { padding: 0.62rem 1.5rem; vertical-align: middle; }
@@ -165,9 +164,15 @@ input[type='checkbox'] { accent-color: var(--accent); width: 15px; height: 15px;
   padding-top: 0.8rem; padding-bottom: 0.9rem; background: rgba(0, 0, 0, 0.2);
 }
 .period tfoot td.v { font-size: 1rem; color: var(--accent); }
+/* Settings recap as chips — scannable, not a sentence to decode. */
 .periods-note {
-  grid-column: 1 / -1; margin: 0.4rem 0 0; font-size: 0.83rem; color: var(--ink-faint);
-  max-width: 80ch;
+  grid-column: 1 / -1; margin: 0.3rem 0 0;
+  display: flex; flex-wrap: wrap; gap: 0.4rem;
+}
+.periods-note span {
+  font-size: 0.74rem; color: var(--ink-dim); font-weight: 500;
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.2rem 0.65rem;
+  background: var(--panel);
 }
 
 /* ---------- overview: one-off cost ---------- */
@@ -186,9 +191,14 @@ input[type='checkbox'] { accent-color: var(--accent); width: 15px; height: 15px;
 }
 .upfront-val {
   font-family: var(--mono); font-size: clamp(1.8rem, 4.4vw, 2.5rem); font-weight: 600;
-  letter-spacing: -0.035em; margin: 0.35rem 0 0.5rem;
+  letter-spacing: -0.035em; margin: 0.35rem 0 0.85rem;
 }
-.upfront-note { margin: 0; font-size: 0.87rem; color: var(--ink-dim); max-width: 74ch; }
+/* Three facts side by side instead of a paragraph explaining them. */
+.upfront-split { display: flex; flex-wrap: wrap; gap: 0.6rem 2.5rem; }
+.fact { display: flex; flex-direction: column; gap: 0.1rem; }
+.fact-l { font-size: 0.72rem; color: var(--ink-faint); font-weight: 600; }
+.fact-l i { font-style: normal; color: var(--ink-dim); margin-left: 0.3rem; }
+.fact-v { font-family: var(--mono); font-size: 1.05rem; font-weight: 600; }
 
 /* ---------- overview: how it works ---------- */
 .steps { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(275px, 1fr)); }
@@ -337,7 +347,12 @@ details.block .body { padding: 0.3rem 1.5rem 1.4rem; }
 .li-lbl { font-size: 0.86rem; flex: 1; }
 .li-amt { font-family: var(--mono); font-size: 0.85rem; white-space: nowrap; }
 .li-amt.zero { color: var(--ink-faint); }
-.li-note { font-size: 0.79rem; color: var(--ink-dim); margin: 0.4rem 0 0; padding-left: 0.1rem; border-left: 2px solid var(--line-2); padding-left: 0.7rem; }
+/* Notes carry the actual reasoning, so they get body-text legibility rather
+   than fine-print treatment. */
+.li-note {
+  font-size: 0.85rem; line-height: 1.6; color: var(--ink-dim); margin: 0.45rem 0 0;
+  border-left: 2px solid var(--line-2); padding-left: 0.75rem;
+}
 .li-src { font-size: 0.72rem; margin-top: 0.35rem; }
 .li-src a { color: var(--ink-faint); border-bottom-color: transparent; }
 .li-src a:hover { color: var(--accent); }

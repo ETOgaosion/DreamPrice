@@ -77,7 +77,16 @@ for (const asset of ASSETS) {
     asset.variants.some((v) => v.id === asset.defaultVariant),
     `${id}: defaultVariant "${asset.defaultVariant}" exists`,
   );
+  /* Blurbs and hints are glanced at, not read. Keep them to one short line so
+     they cannot become the unreadable fine print they replaced. */
   check(typeof asset.blurb === 'string' && asset.blurb.length > 40, `${id}: has a blurb`);
+  check(asset.blurb.split(/\s+/).length <= 18,
+    `${id}: blurb is at most 18 words`, `${asset.blurb.split(/\s+/).length} words`);
+  for (const input of asset.inputs || []) {
+    if (!input.hint) continue;
+    check(input.hint.split(/\s+/).length <= 12,
+      `${id}/${input.id}: hint is at most 12 words`, `${input.hint.split(/\s+/).length} words`);
+  }
   check(/^#[0-9a-f]{6}$/i.test(asset.accent), `${id}: accent is a hex colour`, asset.accent);
 
   const variantIds = new Set();
@@ -284,7 +293,8 @@ check(PERIODS.length === 4, 'there are four periods', String(PERIODS.length));
 for (const p of PERIODS) {
   check(typeof p.label === 'string' && p.label.length > 3, `period ${p.id}: has an English label`);
   check(typeof p.zh === 'string' && p.zh.length >= 2, `period ${p.id}: has a Chinese label`);
-  check(typeof p.note === 'string' && p.note.length > 10, `period ${p.id}: has a note`);
+  /* Deliberately no sub-caption: the label and the number say it already. */
+  check(p.note === undefined, `period ${p.id}: carries no filler caption`);
 }
 console.log(`  ${PERIODS.map((p) => `${p.label} / ${p.zh}`).join(' · ')}`);
 

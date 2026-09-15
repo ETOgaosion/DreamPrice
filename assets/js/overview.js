@@ -40,7 +40,6 @@ function render() {
     head.append(
       el('h2', null, `${period.label} <small>${period.zh}</small>`),
       el('div', 'period-total', money(total, cur)),
-      el('p', 'period-note', esc(period.note)),
     );
     card.append(head);
 
@@ -67,36 +66,36 @@ function render() {
 
   /* Up-front sits apart, because it is not a period and adding it to the tables
      would be the fastest way to make them lie. */
-  const owned = ASSETS.filter((a) => a.owned && state.enabled[a.id]);
-  const stillToFind = p.upFront - p.alreadyPaid;
+  /* One-off cost, stated as three facts rather than a paragraph. */
   const box = el('div', 'upfront-inner');
+  const facts = [
+    ['Already paid', '已付', fmtCompact(p.alreadyPaid, cur)],
+    ['Still ahead', '还要付', fmtCompact(p.upFront - p.alreadyPaid, cur)],
+    ['Refundable deposit', '押金可退', fmtCompact(p.refundable, cur)],
+  ].filter(([, , v]) => !/^[^\d]*0$/.test(v));
+
   box.append(
-    el('div', 'upfront-lbl', 'One-off, before any of the above <small>一次性投入</small>'),
+    el('div', 'upfront-lbl', 'One-off <small>一次性投入</small>'),
     el('div', 'upfront-val', fmtCompact(p.upFront, cur)),
-    el('p', 'upfront-note',
-      `Purchase prices, taxes, deposits, agency and key money, winter tyres. ` +
-      `${fmtCompact(p.refundable, cur)} of that is refundable deposit you get back, so the true sunk ` +
-      `cost is ${fmtCompact(p.upFront - p.refundable, cur)}.` +
-      (owned.length
-        ? ` ${fmtCompact(p.alreadyPaid, cur)} is already spent on the ` +
-          `${esc(owned.map((a) => a.name).join(' and '))} — money gone, not money to find. ` +
-          `That leaves ${fmtCompact(stillToFind, cur)} ahead of you.`
-        : '')),
   );
+  const split = el('div', 'upfront-split');
+  for (const [en, zh, v] of facts) {
+    const f = el('div', 'fact');
+    f.append(el('span', 'fact-l', `${en} <i>${zh}</i>`), el('span', 'fact-v', v));
+    split.append(f);
+  }
+  box.append(split);
   $('#upfront').replaceChildren(box);
 
-  const dropped = ASSETS.filter((a) => !state.enabled[a.id]);
-  const note = dropped.length
-    ? ` Excluding ${esc(dropped.map((a) => a.name).join(', '))}.`
-    : '';
+  /* Settings recap: chips, not prose. */
+  const chips = [
+    `${included.length}/${ASSETS.length} assets`,
+    { low: 'Optimistic', base: 'Realistic', high: 'Pessimistic' }[state.scenario],
+    `${state.years}-year average`,
+    state.includeCapital ? 'Depreciation in' : 'Depreciation out',
+  ];
   $('#periods').insertAdjacentHTML('beforeend',
-    `<p class="periods-note">` +
-    `${included.length} of ${ASSETS.length} assets, ${esc({ low: 'optimistic', base: 'realistic', high: 'pessimistic' }[state.scenario])} scenario, ` +
-    `averaged over ${state.years} year${state.years > 1 ? 's' : ''}.${note} ` +
-    `${state.includeCapital
-      ? 'Depreciation is counted, because it is a real cost — you just never write a cheque for it.'
-      : 'Depreciation is excluded, so these are pure out-of-pocket payments.'}` +
-    `</p>`);
+    `<p class="periods-note">${chips.map((c) => `<span>${esc(c)}</span>`).join('')}</p>`);
 }
 
 $('#fx-stamp').textContent =

@@ -113,10 +113,10 @@ export function evaluate(asset, state) {
 
 /* The four periods the overview page is built around. */
 export const PERIODS = [
-  { id: 'perYear',    label: 'Per year',    zh: '每年',   note: 'averaged over the whole horizon' },
-  { id: 'perQuarter', label: 'Per quarter', zh: '每季度', note: 'one year divided by four' },
-  { id: 'perMonth',   label: 'Per month',   zh: '每月',   note: 'what leaves your account monthly' },
-  { id: 'perDay',     label: 'Per day',     zh: '每天',   note: 'including the days you do not drive' },
+  { id: 'perYear',    label: 'Per year',    zh: '每年' },
+  { id: 'perQuarter', label: 'Per quarter', zh: '每季度' },
+  { id: 'perMonth',   label: 'Per month',   zh: '每月' },
+  { id: 'perDay',     label: 'Per day',     zh: '每天' },
 ];
 
 function nextResidual(asset, v, ctx, current, price, year) {

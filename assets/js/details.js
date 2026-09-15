@@ -167,7 +167,7 @@ function card(asset, r) {
   const show = (amount) => (Math.abs(amount) < 1000 ? fmt(amount, cur, { digits: 0 }) : fmtCompact(amount, cur));
   const items = [
     [asset.owned ? 'Already paid' : 'Up front', fmtCompact(r.upFront, cur),
-      r.refundable ? `${fmtCompact(r.refundable, cur)} refundable` : (asset.owned ? '落地价' : '')],
+      r.refundable ? `${fmtCompact(r.refundable, cur)} back` : ''],
     /* The same four periods the front page is built around. */
     ...PERIODS.map((p) => [
       p.label,
@@ -225,8 +225,7 @@ function lineBlock(summary, items, cur, total, totalLabel, isUpFront) {
   t.innerHTML = `<span>${esc(totalLabel)}</span><span>${fmt(total, cur, { digits: 0 })}</span>`;
   body.append(t);
   if (isUpFront) {
-    body.append(el('p', 'hint',
-      'Refundable items are money you park, not money you spend — they are in the up-front figure but excluded from the cost of ownership.'));
+    body.append(el('p', 'hint', 'Refundable items are money you park, not money you spend.'));
   }
   d.append(body);
   return d;
@@ -272,24 +271,18 @@ function yearBlock(r, cur) {
   if (isCar && r.variant.appr) {
     const rate = r.variant.appr[state.scenario] ?? r.variant.appr.base;
     notes.push(
-      `Modelled at ${rate >= 0 ? '+' : ''}${(rate * 100).toFixed(0)}%/yr. The R35's retail floor is rising, but largely through ` +
-      `survivorship: inventory fell 13% while the average listing rose 6.7% over nine months, as tired high-mileage cars leave ` +
-      `the market. Trade-in values for 2010–2012 cars are flat to down, and the retail-to-trade spread is 26–30% — you buy at ` +
-      `retail and exit at trade. Do not model an ordinary early car as an appreciating asset.`);
+      `Value change ${rate >= 0 ? '+' : ''}${(rate * 100).toFixed(0)}%/yr. Asking prices are rising, but trade-in ` +
+      `prices are flat — you buy at retail and sell at trade, a 26–30% gap.`);
   } else if (isCar && r.variant.dep) {
     const rate = r.variant.dep[state.scenario] ?? r.variant.dep.base;
     notes.push(
-      `Modelled at ${(rate * 100).toFixed(0)}%/yr declining balance${rate < 0 ? ' — a negative rate, i.e. appreciation' : ''}. ` +
-      `Smartepenger put a 6-year-old Norwegian car at about 10%/yr. The W204's near-zero rate is the sourced exception: ` +
-      `PistonHeads say the decline has "slowed dramatically" and CarBuzz measure roughly +15% over 18 months — but only for ` +
-      `cars with documented head-bolt and camshaft repairs. Without that paperwork it is not an appreciating asset.`);
+      `Loses ${(rate * 100).toFixed(0)}% of its value each year${rate < 0 ? ' — negative, so it gains' : ''}. ` +
+      `A typical 6-year-old Norwegian car loses about 10%/yr; the old V8 holds value only with repairs on paper.`);
   } else if (isCar) {
-    notes.push(
-      `Depreciation is applied to the vehicle price only — taxes and fees are gone the moment you pay them. ` +
-      `"Car worth" is what you would get back if you sold at the end of that year.`);
+    notes.push('Only the car loses value; taxes and fees are gone at once. "Car worth" is resale value.');
   } else {
     const e = r.asset.escalation[state.scenario] ?? r.asset.escalation.base;
-    notes.push(`Rent escalates at ${(e * 100).toFixed(1)}%/yr in this scenario; other lines follow the global inflation slider.`);
+    notes.push(`Rent rises ${(e * 100).toFixed(1)}% a year here.`);
   }
   for (const n of notes) body.append(el('p', 'hint', esc(n)));
   d.append(body);
