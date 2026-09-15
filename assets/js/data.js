@@ -230,6 +230,33 @@ export const SRC = {
   pistonheadsW204:{ t: 'PistonHeads — W204 C 63 decline has "slowed dramatically"', u: 'https://www.pistonheads.com/news/ph-spottedykywt/mercedes-c63-amg-w204--the-brave-pill/44315' },
   forbrukerDealer:{ t: 'Forbrukerrådet — 5 years reklamasjonsrett from a dealer vs 2 from a private seller', u: 'https://www.forbrukerradet.no/forside/bil/kjop-og-salg-av-bil/misfornoyd-med-kjop/' },
   mbAmgOnRequest:{ t: 'mercedes-benz.no — every model group has a published service price except AMG', u: 'https://www.mercedes-benz.no/our-brands/service-5-pluss/' },
+
+  // China — Ferrari Amalfi
+  amalfiFerrari: { t: 'Ferrari — Amalfi technical specification (3,855 cc, 640 cv)', u: 'https://www.ferrari.com/en-EN/auto/ferrari-amalfi' },
+  amalfiPrice:   { t: '易车 — Amalfi China launch 2025-10-16, 指导价 259.85万',        u: 'https://news.yiche.com/xinchexiaoxi/20251016/10104411558.html' },
+  amalfiAutohome:{ t: '汽车之家 — Ferrari China price list',                          u: 'https://car.autohome.com.cn/price/brand-42-78.html' },
+  luxTaxGov:     { t: '国务院 — 财政部/税务总局公告2025年第3号, 超豪华小汽车消费税全文', u: 'https://www.gov.cn/zhengce/zhengceku/202507/content_7033979.htm' },
+  luxTax2016:    { t: '深圳税务 — 财税〔2016〕129号, 零售环节加征10%',                  u: 'https://shenzhen.chinatax.gov.cn/sztax/zcwj/zcfgk/zjzcfgk/xfszj/201611/2c245769cc704a2d8bf14dc75555f9d7.shtml' },
+  luxTaxSplit:   { t: '江苏省税务局 — splitting the invoice to dodge the tax triggers back-tax and audit', u: 'https://jiangsu.chinatax.gov.cn/art/2026/1/2/art_9046_1689873.html' },
+  cnImportTax:   { t: '第一财经 — China car import tariff is 15%',                     u: 'https://www.yicai.com/news/102302580.html' },
+  szPlateRules:  { t: '《深圳市小汽车增量调控管理实施细则》第十五条 — 普通指标 eligibility', u: 'https://xqctk.jtys.sz.gov.cn/glbf/' },
+  szPlateAuction:{ t: '深圳本地宝 — 2026年第8期车牌竞价结果, 个人均价 11,670',           u: 'https://sz.bendibao.com/jt/2026825/1011196.htm' },
+  szOutOfTown:   { t: '深圳交警 — 非粤B车牌工作日高峰限行通告',                          u: 'https://szjj.sz.gov.cn/ZWGK/TZGG/GGJG/content/post_12399647.html' },
+  gdVesselTax:   { t: '广东省财政厅 — 粤府〔2022〕81号 车船税税额表',                    u: 'http://czt.gd.gov.cn/gkmlpt/content/4/4028/post_4028842.html' },
+  ferrari7yr:    { t: 'Ferrari 中国 — 7年原厂保养计划 (Genuine Maintenance)',           u: 'https://www.ferrari.com/zh-CN/auto/car-part-services-warranty-maintenance' },
+  ferrariSzDealer:{ t: '骏佳行 — the only Ferrari dealer in Shenzhen, service in 坂田',  u: 'https://shenzhen.ferraridealers.com/zh-CN/about-us' },
+  ferrariSvcCost:{ t: '凤凰网 — ultra-luxury brand servicing cost comparison',          u: 'https://auto.ifeng.com/c/8av7KKNXvty' },
+  romaInsurance: { t: '车市锐尔 — Ferrari Roma insurance breakdown, 车损险 ≈ ¥54,000',   u: 'https://www.csruier.cn/cs/12894.html' },
+  cpicSupercar:  { t: '中国太保 — insurers decline 车损险 on Ferraris, liability only',  u: 'https://www.cpic.com.cn/c/2021-05-31/1764163.shtml' },
+  cnPartsRatio:  { t: '中国消费网 — 中保研 零整比100指数 390.77% (第21期)',              u: 'https://www.ccn.com.cn/Content/2026/01-04/1821575330.html' },
+  sz98Petrol:    { t: '金投网 — 广东98号汽油 ¥11.00/L (2026-09-12)',                    u: 'https://energy.cngold.org/c/2026-09-15/c10757945.html' },
+  amalfiFuelTest:{ t: 'drive.reviews — Amalfi real-world 14–18 L/100km',               u: 'https://www.drive.reviews/ferrari-amalfi-review-2026/' },
+  amalfiTyres:   { t: 'Ferrari — Amalfi wheels: 245/35 R20 front, 285/35 R20 rear',    u: 'https://jakarta.ferraridealers.com/en-GB/articles/Introducing-the-Ferrari-Amalfi' },
+  ferrariBrakes: { t: 'Europarts360 — Ferrari CCM brake replacement cost',             u: 'https://europarts360.com/blogs/guide/oem-vs-aftermarket-which-brake-pads-are-right-for-your-ferrari-f8-tributo' },
+  ferrariParts:  { t: '帮手汽配 — Ferrari clutch, CCM disc and pad pricing in China',    u: 'https://www.bsqipei.com/products/1708200303655.html' },
+  szParkingGov:  { t: '深圳市政府 — 停车场收费政府指导价',                               u: 'https://www.sz.gov.cn/cn/xxgk/zfxxgj/tzgg/content/post_1627515.html' },
+  szParkingMkt:  { t: '大广网 — Shenzhen fixed-bay market rates by district',            u: 'https://bbs.t0001.com/bzawd/202512/908894.html' },
+  romaUsed:      { t: '汽车之家二手车 — 2020 Roma, 4,000 km, Shenzhen, ask ¥2,188,000',  u: 'https://www.autohome.com.cn/x/usedcar-2009691458348646400.html' },
 };
 
 /* Helper for building a line item. */
@@ -495,6 +522,267 @@ const emeya = {
           ['NEV battery safety test', 'mandatory from 2025-03-01 (GB/T 44500-2024)'],
         ],
         note: 'No physical inspection for the first 6 years. Void if the car causes a serious accident or is illegally modified.' }),
+    ];
+  },
+};
+
+/* ------------------------------------------------------------------ */
+/* 1b. Ferrari Amalfi — China                                         */
+/* ------------------------------------------------------------------ */
+const ferrari = {
+  id: 'ferrari',
+  kind: 'car',
+  flag: '🇨🇳',
+  name: 'Ferrari Amalfi',
+  nativeName: '法拉利 Amalfi · 深圳',
+  place: 'Shenzhen, China',
+  accent: '#ef4444',
+  currency: 'CNY',
+  blurb: '¥2,598,500. Every tax the electric Emeya dodges, this one pays in full.',
+  variants: [
+    {
+      id: 'amalfi',
+      label: 'Amalfi 2026款 3.9T V8 — ¥2,598,500',
+      msrp: 2598500,
+      cc: 3855, lPer100: { low: 11.2, base: 15, high: 18 },
+      ins: { low: 55000, base: 70000, high: 100000 },
+      dep: { low: 0.07, base: 0.10, high: 0.15 },
+      warn: '深圳 blocks this. 《小汽车增量调控管理实施细则》第十五条(三) only grants a petrol ' +
+            '(普通) plate to someone with NO car registered in Shenzhen — and you own the Emeya. ' +
+            '第十六条 offers a second quota for BEV only, and selling the Emeya yields a BEV-type ' +
+            'renewal quota that still cannot register a petrol car. Fix the plate before the budget.',
+    },
+  ],
+  defaultVariant: 'amalfi',
+  inputs: [
+    { id: 'options', label: '选配 Options', unit: 'CNY incl. VAT', type: 'number',
+      min: 0, max: 900000, step: 10000, def: 300000,
+      hint: 'Taxed twice over: 10% purchase tax and 10% luxury tax.' },
+    { id: 'km', label: 'Distance driven', unit: 'km/year', type: 'range', min: 2000, max: 20000, step: 1000, def: 10000 },
+    { id: 'plate', label: '粤B 牌照 route', type: 'select', def: 'company',
+      options: [
+        { v: 'company', l: '单位竞价 — company name, ~¥11,000' },
+        { v: 'family', l: '个人竞价 — a family member, ~¥13,000' },
+        { v: 'outoftown', l: '非粤B — banned on weekday peaks' },
+      ],
+      hint: 'Not available in your own name while you own the Emeya.' },
+  ],
+  rates: { petrol: 11.00 },
+
+  oneTime(c) {
+    const v = c.v;
+    const options = c.in.options;
+    const invoice = v.msrp + options;
+    const exVat = invoice / 1.13;
+    const purchaseTax = exVat * 0.10;
+    const luxOnOptions = (options / 1.13) * 0.10;
+    const luxEmbedded = (v.msrp / 1.13) * 0.10;
+    const plate = { company: 11000, family: 13000, outoftown: 0 }[c.in.plate];
+
+    return [
+      it('capital', `成交价 — 指导价 ${cny(v.msrp)} + ${cny(options)} 选配`, invoice, {
+        src: SRC.amalfiPrice, frequencyLabel: 'one-off',
+        formula: `${cny(v.msrp)} + ${cny(options)} = ${cny(invoice)}`,
+        facts: [
+          ['China 指导价', '¥2,598,500 (launched 2025-10-16)'],
+          ['Engine', '3,855 cc twin-turbo V8, 640 cv'],
+          ['0–100 km/h', '3.3 s · top speed 320 km/h'],
+          ['Italy list', '€240,000 incl. IVA'],
+          ['USA', 'USD 266,810'],
+          ['Predecessor Roma 指导价', '¥2,418,000'],
+          ['Order lead time', '≈1 year, into Q4 2027'],
+          ['Discounting', 'none — there is a queue'],
+        ],
+        note: 'Single trim in China. Roughly 41% of this sticker is already tax: 15% tariff, 25% ' +
+              'import consumption tax on a 3.0–4.0L engine, 10% embedded luxury tax and 13% VAT. ' +
+              'At 3,855 cc it sits 145 cc under the 4.0L cliff where import consumption tax jumps to 40%.',
+      }),
+      it('tax', '车辆购置税 — full 10%, no NEV relief', purchaseTax, {
+        src: SRC.nevTax, frequencyLabel: 'one-off',
+        formula: `${cny(invoice)} ÷ 1.13 × 10% = ${cny(purchaseTax)}`,
+        facts: [
+          ['Rate for an ICE car', '10%, no relief of any kind'],
+          ['Ex-VAT taxable base', cny(exVat)],
+          ['Tax payable', cny(purchaseTax)],
+          ['Your Emeya paid', '¥41,460 on ¥638,000'],
+          ['NEV relief this car gets', '¥0 — petrol'],
+          ['Tax from the options alone', cny((options / 1.13) * 0.10)],
+        ],
+        note: 'The Emeya got the capped new-energy half-rate. A petrol car gets nothing: the full ' +
+              '10% of the ex-VAT invoice, options included.',
+      }),
+      it('tax', '超豪华小汽车消费税 — 10% on the options', luxOnOptions, {
+        src: SRC.luxTaxGov, frequencyLabel: 'one-off',
+        formula: `${cny(options)} ÷ 1.13 × 10% = ${cny(luxOnOptions)}`,
+        facts: [
+          ['Threshold', '¥900,000 ex-VAT — this car is 2.6× over'],
+          ['Rate', '10%, 零售环节加征'],
+          ['Taxpayer', 'the dealer, not you — it is a 价内税'],
+          ['Embedded in the ¥2,598,500 sticker', cny(luxEmbedded)],
+          ['Ferrari in scope since', '2016-12-01, so the MSRP already absorbs it'],
+          ['Base includes', '精品, 配饰 and 服务 billed with the car'],
+          ['Splitting the invoice', 'back-tax, late fees and audit'],
+          ['Used resale', 'exempt since 2025-07-20'],
+        ],
+        note: 'Ferrari has been above this threshold since the tax was created in 2016, so the sticker ' +
+              'already contains ' + cny(luxEmbedded) + ' of it — that is not a second cheque. Your options are ' +
+              'the genuinely new exposure. Get the contract to say 含超豪华消费税 in writing: one 2018 court ' +
+              'case saw a Bentley buyer billed ¥373,000 as if it were withholding on their behalf.',
+      }),
+      it('tax', `粤B 牌照 — ${c.in.plate === 'outoftown' ? '非粤B, no auction' : '竞价 auction'}`, plate, {
+        src: SRC.szPlateAuction, frequencyLabel: 'one-off',
+        facts: [
+          ['2026 第8期 个人均价', '¥11,670'],
+          ['2026 第8期 单位均价', '¥10,678'],
+          ['Auction reserve floor', '¥10,000'],
+          ['2026 第5期 个人均价', '¥16,421 — falling all year'],
+          ['Lottery odds, 第7期', '0.112%'],
+          ['Annual 普通 quota cap', '80,000'],
+          ['BEV quota by comparison', 'free, uncapped, no lottery'],
+          ['非粤B plate restriction', 'banned Mon–Fri 07:00–09:00 and 17:30–19:30'],
+        ],
+        note: c.in.plate === 'outoftown'
+          ? 'A non-Shenzhen plate costs nothing at auction but is banned from the whole city on weekday ' +
+            'peaks, with one exemption day a month. For a car you would drive at weekends, that is survivable.'
+          : 'Cheap in cash terms — Shanghai runs ¥90,000+ — but you personally cannot bid while the Emeya ' +
+            'is registered to you. A company quota needs a Shenzhen-registered firm that paid ¥50,000 of ' +
+            'local tax last year, and titles the car to the company.',
+      }),
+      it('fees', '上牌 / 号牌工本费', c.pick({ low: 373, base: 500, high: 1500 }), {
+        src: SRC.szQuota, est: true, frequencyLabel: 'one-off',
+        facts: [['上牌一条龙', '≈¥500'], ['DIY', '≈¥373'], ['Company registration', 'adds admin']],
+      }),
+    ];
+  },
+  annual(c) {
+    const v = c.v, km = c.in.km;
+    const litres = km * c.pick(v.lPer100) / 100;
+    const insured = v.msrp + c.in.options;
+    return [
+      it('insurance', '交强险 + 商业险 (车损 + 三者 + 划痕)', c.pick(v.ins) * (insured / v.msrp), {
+        src: SRC.romaInsurance, est: true, frequencyLabel: 'per year',
+        facts: [
+          ['交强险, year 1', '¥950'],
+          ['Roma 车损险', '¥54,000/yr'],
+          ['Roma full package', '¥57,600–60,000/yr'],
+          ['Scaled to the Amalfi', '¥58,031 车损险'],
+          ['¥3M-class Ferrari market quote', '≈¥100,000/yr'],
+          ['F8 Tributo, for scale', '¥353,000/yr'],
+          ['燃油车 零整比 index', '390.77% (第21期)'],
+          ['Ferrari 零整比', 'not published — insurers have no benchmark'],
+          ['Shenzhen 三者险 loading', '+30–50% vs tier-3 cities'],
+        ],
+        note: 'The real risk is not the price but availability: CPIC\'s own consumer material documents ' +
+              'insurers refusing 车损险 on Ferraris and writing liability cover only. Get a binding quote ' +
+              'in writing before you place the order, not after.',
+      }),
+      it('energy', `98号汽油 — ${Math.round(litres).toLocaleString()} L at ¥${this.rates.petrol.toFixed(2)}/L`, litres * this.rates.petrol, {
+        src: SRC.sz98Petrol, frequencyLabel: 'per year',
+        formula: `${km.toLocaleString()} km × ${c.pick(v.lPer100)} L/100km × ¥${this.rates.petrol.toFixed(2)} = ${cny(litres * this.rates.petrol)}`,
+        facts: [
+          ['广东 98号, 2026-09-12', '¥11.00/L — the dearest province'],
+          ['National average', '¥10.13/L'],
+          ['2026 range in Guangdong', '¥9.80 – ¥11.53'],
+          ['Official WLTP combined', '11.2 L/100km'],
+          ['WLTP urban phase', '19.7 L/100km'],
+          ['Independent real-world', '14–18 L/100km'],
+          ['Chinese owner report', '市区 15 L/100km 起步'],
+          ['Tank', '80 L, 98 RON mandatory'],
+          ['Emeya per 10,000 km', '≈¥1,200 — this car is ~14×'],
+        ],
+      }),
+      it('tax', '车船税 — 广东, 3.0–4.0L band', 2400, {
+        src: SRC.gdVesselTax, frequencyLabel: 'per year',
+        facts: [
+          ['广东 3.0–4.0L', '¥2,400/yr'],
+          ['广东 >4.0L', '¥3,600/yr'],
+          ['广东 2.5–3.0L', '¥1,200/yr'],
+          ['This car', '3,855 cc — top of the band'],
+          ['Legal basis', '粤府〔2022〕81号, valid to 2027-12-31'],
+          ['Collected by', 'your insurer, with 交强险'],
+          ['Your Emeya (BEV)', '¥0 — outside the tax entirely'],
+        ],
+      }),
+      it('maintenance', '保养 — Ferrari 7年原厂保养计划', c.pick({ low: 0, base: 0, high: 8000 }), {
+        src: SRC.ferrari7yr, frequencyLabel: 'per year',
+        facts: [
+          ['Cost, years 1–7', '¥0 — free, confirmed for China'],
+          ['Interval', 'annual OR every 20,000 km'],
+          ['Covers', 'labour, OEM parts, lubricants, engine oil, brake fluid'],
+          ['Does NOT cover', 'tyres, brakes, clutch, wipers'],
+          ['Transferable on resale', 'yes'],
+          ['Year 8+ routine service', '¥10,000–15,000/yr'],
+          ['Major service', 'up to ¥50,000'],
+          ['Porsche / Lamborghini by comparison', '¥5,000–6,000 / ¥9,000–12,000 per year from new'],
+          ['Ferrari dealers in Shenzhen', '1 — 骏佳行, service in 坂田'],
+        ],
+        note: 'Genuinely generous, and cheaper than any rival for seven years. The catch is the 20,000 km ' +
+              'ceiling and the single service point across town in Bantian, which leaves you no leverage ' +
+              'on out-of-schedule work.',
+      }),
+      it('tyres', 'Tyres — 245/35 R20 front, 285/35 R20 rear', c.pick({ low: 12000, base: 14000, high: 16000 }) / 20000 * km, {
+        src: SRC.amalfiTyres, est: true, frequencyLabel: 'per year',
+        formula: `${cny(c.pick({ low: 12000, base: 14000, high: 16000 }))} per set ÷ 20,000 km × ${km.toLocaleString()} km`,
+        facts: [
+          ['Front', '245/35 R20 on 8.0J'],
+          ['Rear', '285/35 R20 on 10.0J'],
+          ['OE brands', 'Bridgestone Potenza Sport, Pirelli P Zero'],
+          ['Ferrari homologation codes', 'F02 front, F03 rear'],
+          ['Set of 4 fitted, China', '¥12,000–16,000'],
+          ['Assumed life', '20,000 km — rears wear much faster'],
+          ['Non-OE fitment', 'queried at resale'],
+        ],
+      }),
+      it('maintenance', 'Brakes — carbon-ceramic, amortised', c.pick({ low: 2000, base: 4000, high: 20000 }), {
+        src: SRC.ferrariBrakes, est: true, frequencyLabel: 'per year',
+        facts: [
+          ['Discs', '390 mm front / 360 mm rear, CCM standard'],
+          ['Full CCM replacement', '¥129,000–200,000'],
+          ['OEM pads, per set', '¥6,000–8,000'],
+          ['Pad life, street', '30,000–50,000 km'],
+          ['Pad life, track', '10,000–20,000 km'],
+          ['CCM disc life, road use', 'usually the life of the car'],
+          ['Salvage discs', '¥30,000–50,000/pair — counterfeits circulate'],
+        ],
+        note: 'Carbon-ceramic discs rarely wear out on road use, so the base case is pads only. The high ' +
+              'case is the tail: crack a rotor and it is a six-figure event in one invoice.',
+      }),
+      it('maintenance', 'Clutch — F1 DCT, amortised', c.pick({ low: 500, base: 1200, high: 2500 }), {
+        src: SRC.ferrariParts, est: true, frequencyLabel: 'per year',
+        facts: [
+          ['OEM clutch plates', '¥8,000–10,000'],
+          ['Aftermarket', '¥3,000–5,000'],
+          ['Fitting labour', '¥1,500–2,000'],
+          ['Inspection interval', 'every 80,000–100,000 km'],
+          ['Full DCT assembly, worst case', '¥150,000–200,000'],
+        ],
+      }),
+      it('parking', 'Parking — secure indoor bay', c.pick({ low: 6000, base: 14400, high: 24000 }), {
+        src: SRC.szParkingMkt, frequencyLabel: 'per year',
+        formula: `${cny(c.pick({ low: 500, base: 1200, high: 2000 }))}/month × 12`,
+        facts: [
+          ['Government base, residential indoor', '¥250/mo'],
+          ['Nanshan market rate', '¥1,000–2,000/mo'],
+          ['Futian market rate', '¥800–1,500/mo'],
+          ['Car width', '1,974 mm excluding mirrors'],
+          ['Standard PRC bay', '2,500 mm — ≈250 mm total clearance'],
+          ['Car height / length', '1,301 mm / 4,660 mm'],
+          ['Biggest damage risk', 'neighbouring door strikes, then ramps'],
+        ],
+        note: 'Specify the front-lift system. Shenzhen\'s speed humps and garage ramp transitions are the ' +
+              'likeliest way to destroy the splitter, and a shared public bay leaves ~25 cm of door clearance.',
+      }),
+      it('fees', '年检 — amortised', c.pick({ low: 0, base: 50, high: 300 }), {
+        src: SRC.szInspect, frequencyLabel: 'per year',
+        facts: [
+          ['Years 1–6', 'exempt, e-label only'],
+          ['On-line test at', 'year 6 and year 10'],
+          ['After year 10', 'annually'],
+          ['ICE fee', '¥200–300 — includes the emissions test'],
+          ['BEV fee', '¥160–210'],
+          ['Exemption forfeited by', '非法改装, or registering >4 yrs after build'],
+        ],
+      }),
     ];
   },
 };
@@ -1631,7 +1919,7 @@ const arctic = {
   },
 };
 
-export const ASSETS = [emeya, loft, gtr, tower, amg, arctic];
+export const ASSETS = [emeya, ferrari, loft, gtr, tower, amg, arctic];
 
 /* ------------------------------------------------------------------ */
 /* Reality checks — things the numbers alone don't tell you            */
@@ -1644,6 +1932,43 @@ export const CAVEATS = [
       'of home charging to ¥4,620/yr of public charging and makes a paid parking space mandatory rather than ' +
       'optional. The default here assumes 40% home charging for that reason.',
     src: SRC.szElecConvert,
+  },
+  {
+    tag: 'You cannot register the Ferrari in Shenzhen while you own the Emeya',
+    body:
+      'This is a gate, not a cost line. 《深圳市小汽车增量调控管理实施细则》第十五条(三) only grants ' +
+      'the petrol-capable 普通小汽车增量指标 to an applicant with no car registered in Shenzhen, and the ' +
+      'Emeya is registered to you. 第十六条 grants a second quota for BEV only. And selling the Emeya does ' +
+      'not help: 第五十二条 makes the renewal quota match the original type, so a BEV-quota car yields a ' +
+      'BEV renewal quota that still cannot register a petrol car. The workable routes are a company ' +
+      'quota (a Shenzhen-registered firm that paid ¥50,000 of local tax last year, with the car titled to ' +
+      'it), a family member with no Shenzhen car, or a non-粤B plate that is banned citywide on weekday ' +
+      'peaks. Worth knowing: a Ferrari 296 GTB is a plug-in hybrid and qualifies for the free, uncapped ' +
+      '混合动力 quota as a legitimate second car — the plate problem disappears entirely.',
+    src: SRC.szPlateRules,
+  },
+  {
+    tag: 'The Ferrari pays every tax the Emeya dodges',
+    body:
+      'Same city, same buyer, opposite tax treatment. The Emeya paid a capped new-energy purchase tax and ' +
+      'nothing else; the Ferrari pays the full 10% with no relief, ¥2,400 a year of 车船税 that BEVs are ' +
+      'outside of entirely, and a plate that must be won at auction rather than handed over free. Around ' +
+      '41% of the ¥2,598,500 sticker is already tax — 15% tariff, 25% import consumption tax, 10% embedded ' +
+      'luxury tax, 13% VAT — and the purchase tax sits on top, so roughly half of what you hand over ' +
+      'reaches the state. One consolation: at 3,855 cc it sits 145 cc below the 4.0-litre cliff where ' +
+      'import consumption tax jumps from 25% to 40%.',
+    src: SRC.cnImportTax,
+  },
+  {
+    tag: 'Insuring a Ferrari in China may not be possible at any price',
+    body:
+      'CPIC\u2019s own consumer material documents Chinese insurers declining 车损险 on Ferraris and offering ' +
+      'liability cover only, with one owner unable to insure a ¥3M car at all. The stated logic is ' +
+      '"低保费、高赔付". Ferrari is not even in 中保研\u2019s 100-model 零整比 sample — where the petrol index ' +
+      'already runs at 390.77% — so underwriters have no benchmark and price defensively. Uninsured ' +
+      'own-damage exposure on a ¥2.6M car with ¥130,000–200,000 brakes is a different risk from what a ' +
+      '¥70,000 premium suggests. Get a binding quote before you order.',
+    src: SRC.cpicSupercar,
   },
   {
     tag: 'Options are taxed, and above ¥339,000 they are taxed at the full rate',

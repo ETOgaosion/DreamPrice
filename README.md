@@ -4,12 +4,13 @@
 
 **[dreamprice — what the dream actually costs →](https://etogaosion.github.io/DreamPrice/)**
 
-Six assets across three countries, costed line by line from primary sources, and priced per year,
+Seven assets across three countries, costed line by line from primary sources, and priced per year,
 per month, and per day.
 
 | | Asset | Where |
 |---|---|---|
 | 🇨🇳 | Lotus Emeya 600 SE (owned) | Shenzhen |
+| 🇨🇳 | Ferrari Amalfi (new) | Shenzhen |
 | 🇨🇳 | Duplex loft (rented) | Shenzhen |
 | 🇯🇵 | Nissan GT-R R35 (used) | Tokyo |
 | 🇯🇵 | Tower mansion (rented) | Tokyo |
@@ -74,6 +75,10 @@ A few findings worth knowing before you read the numbers:
 - **Buying used in Norway skips engangsavgift entirely.** It is paid once at first registration and
   never re-levied, so a NOK 700,000 budget reaches cars that cost NOK 1.5M new. Your whole tax bill is
   1,942–4,532 kr.
+- **A Ferrari cannot be registered in Shenzhen by someone who already owns a car there.** 《小汽车增量
+  调控管理实施细则》第十五条(三) restricts the petrol-capable plate to applicants with no Shenzhen-registered
+  car, 第十六条 offers a second quota for BEVs only, and selling the Emeya yields a BEV-type renewal quota.
+  The plate is a gate, not a line item.
 - **SSB does not publish Tromsø rent.** Live FINN listings for an actual house are 22,000–36,000 kr, not
   the 13,000 kr that gets quoted second-hand.
 
