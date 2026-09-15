@@ -67,6 +67,8 @@ function render() {
 
   /* Up-front sits apart, because it is not a period and adding it to the tables
      would be the fastest way to make them lie. */
+  const owned = ASSETS.filter((a) => a.owned && state.enabled[a.id]);
+  const stillToFind = p.upFront - p.alreadyPaid;
   const box = el('div', 'upfront-inner');
   box.append(
     el('div', 'upfront-lbl', 'One-off, before any of the above <small>一次性投入</small>'),
@@ -74,7 +76,12 @@ function render() {
     el('p', 'upfront-note',
       `Purchase prices, taxes, deposits, agency and key money, winter tyres. ` +
       `${fmtCompact(p.refundable, cur)} of that is refundable deposit you get back, so the true sunk ` +
-      `cost is ${fmtCompact(p.upFront - p.refundable, cur)}.`),
+      `cost is ${fmtCompact(p.upFront - p.refundable, cur)}.` +
+      (owned.length
+        ? ` ${fmtCompact(p.alreadyPaid, cur)} is already spent on the ` +
+          `${esc(owned.map((a) => a.name).join(' and '))} — money gone, not money to find. ` +
+          `That leaves ${fmtCompact(stillToFind, cur)} ahead of you.`
+        : '')),
   );
   $('#upfront').replaceChildren(box);
 

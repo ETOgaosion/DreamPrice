@@ -63,7 +63,7 @@ export function loadState() {
     for (const input of asset.inputs || []) {
       const value = stored.inputs?.[asset.id]?.[input.id];
       if (value === undefined) continue;
-      if (input.type === 'range') {
+      if (input.type === 'range' || input.type === 'number') {
         if (Number.isFinite(value) && value >= input.min && value <= input.max) {
           state.inputs[asset.id][input.id] = value;
         }

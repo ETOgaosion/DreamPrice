@@ -9,7 +9,7 @@ per month, and per day.
 
 | | Asset | Where |
 |---|---|---|
-| 🇨🇳 | Lotus Emeya (new) | Shenzhen |
+| 🇨🇳 | Lotus Emeya 600 SE (owned) | Shenzhen |
 | 🇨🇳 | Duplex loft (rented) | Shenzhen |
 | 🇯🇵 | Nissan GT-R R35 (used) | Tokyo |
 | 🇯🇵 | Tower mansion (rented) | Tokyo |
@@ -47,9 +47,11 @@ bottom of the page.
 
 A few findings worth knowing before you read the numbers:
 
-- **The NEV purchase-tax holiday ended.** From 2026 the relief is capped at ¥15,000, so an Emeya pays
-  exactly ¥15,000 more than it would have in 2025 — and Lotus has separately cut the entry price from
-  ¥668,000 to ¥538,000, which makes repricing rather than wear the dominant cost of ownership.
+- **The NEV purchase-tax holiday ended, and options are inside the tax base.** From 2026 the relief is
+  half the 10% rate but capped at ¥15,000 per car, so the cap binds above roughly ¥339,000 on the
+  invoice — and past that point every extra yuan of options is taxed at the full 10%, not 5%. On the
+  ¥638,000 Emeya invoice the ¥50,000 of options cost ¥4,425 in tax on their own, and the whole car pays
+  ¥41,460 versus ¥28,230 had it been invoiced in 2025.
 - **環境性能割 was abolished on 2026-03-31.** Any Japanese cost guide written before this year is wrong.
 - **You cannot insure an early R35 for what you pay for it.** Real 2026 quotes on a 2008 car returned an
   agreed value of ¥4.35–4.90M against a ¥9–10M purchase price, and hull cover disappears entirely at 20

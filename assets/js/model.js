@@ -162,7 +162,7 @@ export function evaluateAll(state) {
 
 export function portfolio(results, displayCurrency, includeCapital, enabled) {
   const t = {
-    upFront: 0, refundable: 0,
+    upFront: 0, refundable: 0, alreadyPaid: 0,
     perYear: 0, perQuarter: 0, perMonth: 0, perDay: 0,
     total: 0, byCategory: new Map(),
   };
@@ -172,6 +172,8 @@ export function portfolio(results, displayCurrency, includeCapital, enabled) {
     const key = includeCapital ? 'all' : 'cash';
     t.upFront += convert(r.upFront, cur, displayCurrency);
     t.refundable += convert(r.refundable, cur, displayCurrency);
+    /* Assets already bought — money spent, not money to find. */
+    if (r.asset.owned) t.alreadyPaid += convert(r.upFront, cur, displayCurrency);
     t.perYear += convert(r.perYear[key], cur, displayCurrency);
     t.perQuarter += convert(r.perQuarter[key], cur, displayCurrency);
     t.perMonth += convert(r.perMonth[key], cur, displayCurrency);

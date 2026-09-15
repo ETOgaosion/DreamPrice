@@ -12,7 +12,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 
-import { ASSETS, CATEGORIES, CAVEATS, FX, SRC } from '../assets/js/data.js';
+import { ASSETS, CATEGORIES, CAVEATS, FX, LUXURY_TAX_THRESHOLD_EX_VAT, nevPurchaseTax, SRC } from '../assets/js/data.js';
 import {
   categoryBreakdown, convert, defaultInputs, evaluateAll, fmt, PERIODS, portfolio, variantOf,
 } from '../assets/js/model.js';
@@ -88,7 +88,7 @@ for (const asset of ASSETS) {
   }
 
   for (const input of asset.inputs || []) {
-    if (input.type === 'range') {
+    if (input.type === 'range' || input.type === 'number') {
       check(input.def >= input.min && input.def <= input.max,
         `${id}/${input.id}: default ${input.def} is within [${input.min}, ${input.max}]`);
       check(input.step > 0, `${id}/${input.id}: step is positive`);
@@ -136,7 +136,9 @@ for (const asset of ASSETS) {
 
       /* Also push each per-asset input to both extremes. */
       for (const input of asset.inputs || []) {
-        const values = input.type === 'range' ? [input.min, input.def, input.max] : input.options.map((o) => o.v);
+        const values = input.options
+          ? input.options.map((o) => o.v)
+          : [input.min, input.def, input.max];
         for (const value of values) {
           state.inputs[asset.id] = { ...defaultInputs(asset), [input.id]: value };
           for (const years of [1, 5, 15]) {
@@ -172,7 +174,7 @@ for (const asset of ASSETS) {
             for (const currency of CURRENCIES) {
               for (const includeCapital of [true, false]) {
                 const p = portfolio(results, currency, includeCapital, state.enabled);
-                for (const key of ['upFront', 'perYear', 'perQuarter', 'perMonth', 'perDay', 'total']) {
+                for (const key of ['upFront', 'refundable', 'alreadyPaid', 'perYear', 'perQuarter', 'perMonth', 'perDay', 'total']) {
                   check(Number.isFinite(p[key]), `${where}/${currency}: portfolio ${key} is finite`, String(p[key]));
                 }
                 /* Each period table's rows must sum to the total it prints. */
@@ -235,6 +237,45 @@ for (const [i, c] of CAVEATS.entries()) {
   check(SRC_VALUES.has(c.src), `caveat ${i} ("${c.tag}"): cites a registered source`);
 }
 console.log(`  ${CAVEATS.length} caveats`);
+
+/* ------------------------------------------------------------------ */
+section('China NEV purchase tax');
+/* ------------------------------------------------------------------ */
+/*
+ * The taxable base is the invoice total excluding VAT, the statutory rate is
+ * 10%, and for 2026-2027 the NEV relief is half the tax but never more than
+ * ¥15,000. Options invoiced with the car are inside the base, so once the cap
+ * binds they carry the full 10%.
+ */
+for (const [invoice, expectedPayable] of [
+  [300000, 300000 / 1.13 * 0.05],   // below the cap: relief is a clean half
+  [338983, 338983 / 1.13 * 0.05],   // right at the break-even (~¥339k incl. VAT)
+  [538000, 32611.50],               // Emeya 600 list price, from the research
+  [588000, 37035.40],               // Emeya 600 SE list price
+  [638000, 41460.18],               // the actual invoice, options included
+  [918000, 66238.94],               // Emeya 900 GOLD
+]) {
+  const t = nevPurchaseTax(invoice);
+  check(Math.abs(t.payable - expectedPayable) < 1,
+    `purchase tax on ${invoice} is ${Math.round(expectedPayable)}`, String(Math.round(t.payable)));
+  check(Math.abs(t.base - invoice / 1.13) < 0.01, `purchase tax base on ${invoice} strips VAT`);
+  check(t.relief <= 15000 + 1e-9, `purchase tax relief on ${invoice} never exceeds the ¥15,000 cap`, String(t.relief));
+  check(t.payable >= 0, `purchase tax on ${invoice} is not negative`);
+}
+/* Above the cap, every extra yuan of options is taxed at the full 10%. */
+{
+  const a = nevPurchaseTax(588000).payable;
+  const b = nevPurchaseTax(638000).payable;
+  check(Math.abs((b - a) - (50000 / 1.13 * 0.10)) < 1,
+    'options above the cap are taxed at the full 10%', String(Math.round(b - a)));
+  check(nevPurchaseTax(638000).capBinds, 'the ¥15,000 cap binds at a ¥638,000 invoice');
+  check(!nevPurchaseTax(300000).capBinds, 'the cap does not bind at ¥300,000');
+}
+/* The ultra-luxury consumption tax threshold is ex-VAT, which is the whole trap. */
+check(LUXURY_TAX_THRESHOLD_EX_VAT === 900000, 'ultra-luxury threshold is ¥900,000 ex-VAT');
+check(nevPurchaseTax(918000).base < LUXURY_TAX_THRESHOLD_EX_VAT,
+  'the dearest Emeya still sits under the ultra-luxury threshold');
+console.log('  cap break-even ~' + Math.round(15000 * 2 / 0.10 * 1.13).toLocaleString() + ' incl. VAT');
 
 /* ------------------------------------------------------------------ */
 section('Periods');

@@ -96,18 +96,23 @@ function card(asset, r) {
 
   /* inputs */
   const box = el('div', 'card-inputs');
-  const vsel = el('label', 'ctl full');
-  vsel.append(el('span', null, asset.kind === 'car' ? 'Which one' : 'Where'));
-  const select = el('select');
-  for (const v of asset.variants) {
-    const o = el('option', null, esc(v.label));
-    o.value = v.id;
-    if (v.id === state.variants[asset.id]) o.selected = true;
-    select.append(o);
+  if (asset.variants.length > 1) {
+    const vsel = el('label', 'ctl full');
+    vsel.append(el('span', null, asset.kind === 'car' ? 'Which one' : 'Where'));
+    const select = el('select');
+    for (const v of asset.variants) {
+      const o = el('option', null, esc(v.label));
+      o.value = v.id;
+      if (v.id === state.variants[asset.id]) o.selected = true;
+      select.append(o);
+    }
+    select.addEventListener('change', () => { state.variants[asset.id] = select.value; commit(); });
+    vsel.append(select);
+    box.append(vsel);
+  } else {
+    /* Nothing to choose — this one is already owned. */
+    box.append(el('p', 'owned-tag', `${esc(r.variant.label)}`));
   }
-  select.addEventListener('change', () => { state.variants[asset.id] = select.value; commit(); });
-  vsel.append(select);
-  box.append(vsel);
 
   for (const inp of asset.inputs || []) {
     const l = el('label', 'ctl');
@@ -125,6 +130,20 @@ function card(asset, r) {
         commit();
       });
       l.append(range);
+    } else if (inp.type === 'number') {
+      /* A price wants typing, not dragging. */
+      if (inp.unit) { b.textContent = inp.unit; cap.append(b); }
+      const num = el('input', 'num');
+      Object.assign(num, { type: 'number', min: inp.min, max: inp.max, step: inp.step, value: state.inputs[asset.id][inp.id] });
+      const apply = () => {
+        const raw = Number(num.value);
+        if (!Number.isFinite(raw)) return;
+        state.inputs[asset.id][inp.id] = Math.min(inp.max, Math.max(inp.min, Math.round(raw)));
+        commit();
+      };
+      num.addEventListener('change', apply);
+      num.addEventListener('blur', apply);
+      l.append(num);
     } else {
       const s = el('select');
       for (const o of inp.options) {
@@ -147,7 +166,8 @@ function card(asset, r) {
   const cross = cur !== disp;
   const show = (amount) => (Math.abs(amount) < 1000 ? fmt(amount, cur, { digits: 0 }) : fmtCompact(amount, cur));
   const items = [
-    ['Up front', fmtCompact(r.upFront, cur), r.refundable ? `${fmtCompact(r.refundable, cur)} refundable` : ''],
+    [asset.owned ? 'Already paid' : 'Up front', fmtCompact(r.upFront, cur),
+      r.refundable ? `${fmtCompact(r.refundable, cur)} refundable` : (asset.owned ? '落地价' : '')],
     /* The same four periods the front page is built around. */
     ...PERIODS.map((p) => [
       p.label,
@@ -165,8 +185,12 @@ function card(asset, r) {
 
   /* breakdowns */
   c.append(lineBlock(
-    `Up-front — ${fmtCompact(r.upFront, cur)}`,
-    r.oneTime, cur, r.upFront, 'Total at purchase / move-in', true,
+    asset.owned
+      ? `Already paid 已付 — ${fmtCompact(r.upFront, cur)}`
+      : `Up-front — ${fmtCompact(r.upFront, cur)}`,
+    r.oneTime, cur, r.upFront,
+    asset.owned ? 'Total 落地价 paid' : 'Total at purchase / move-in',
+    true,
   ));
   c.append(lineBlock(
     `Every year — ${fmtCompact(r.runningYear1, cur)}`,

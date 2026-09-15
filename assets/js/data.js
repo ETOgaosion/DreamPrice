@@ -235,30 +235,62 @@ export const SRC = {
 /* Helper for building a line item. */
 const it = (category, label, amount, opts = {}) => ({ category, label, amount, ...opts });
 
+const cny = (n) => `¥${Math.round(n).toLocaleString('en-US')}`;
+
+/*
+ * 车辆购置税 for a NEV bought in 2026–2027.
+ *
+ * The taxable base is everything you actually paid the seller, excluding VAT
+ * (《车辆购置税法》第六条) — so factory options invoiced with the car are taxed
+ * too. The 2026–2027 NEV rule halves the 10% rate but caps the relief at
+ * ¥15,000 per passenger car, so above roughly ¥339,000 ex-VAT the cap binds and
+ * every extra yuan of options is taxed at the full 10%.
+ */
+export function nevPurchaseTax(invoiceInclVat) {
+  const base = invoiceInclVat / 1.13;
+  const gross = base * 0.10;
+  const relief = Math.min(gross / 2, 15000);
+  return { base, gross, relief, payable: gross - relief, capBinds: gross / 2 > 15000 };
+}
+
+/* 超豪华小汽车消费税 threshold: ¥900,000 EX-VAT (≈¥1,017,000 on the invoice). */
+export const LUXURY_TAX_THRESHOLD_EX_VAT = 900000;
+
 /* ------------------------------------------------------------------ */
 /* 1. Lotus Emeya — China                                             */
 /* ------------------------------------------------------------------ */
 const emeya = {
   id: 'emeya',
   kind: 'car',
+  owned: true,
   flag: '🇨🇳',
-  name: 'Lotus Emeya',
-  nativeName: '莲花跑车 Emeya · 深圳',
+  name: 'Lotus Emeya 600 SE',
+  nativeName: '莲花跑车 Emeya 600 SE · 已购入 · 深圳',
   place: 'Shenzhen, China',
   currency: 'CNY',
   accent: '#f5c542',
   blurb:
-    'A 612–918 hp electric hyper-GT. Lotus has cut the Chinese entry price twice since launch ' +
-    '(¥668k → ¥538k), which makes repricing — not wear — the dominant cost of owning one.',
+    '已购入 — bought, not shopped for. A 600 SE invoiced at ¥638,000 including options, which is ' +
+    '¥50,000 over the ¥588,000 指导价. Options are part of the purchase-tax base, and because the ' +
+    'NEV relief is capped they are taxed at the full 10%.',
   variants: [
-    { id: '600',  label: 'Emeya 600 — ¥538,000',        msrp: 538000, tax: 32611, tax2025: 17611, ins: { low: 18950, base: 22950, high: 30950 }, kwh100: 22, tyreSet: 9000, tyreLife: 25000 },
-    { id: '600se',label: 'Emeya 600 SE — ¥588,000',     msrp: 588000, tax: 37035, tax2025: 19611, ins: { low: 20000, base: 24500, high: 33000 }, kwh100: 22, tyreSet: 9500, tyreLife: 24000 },
-    { id: '900',  label: 'Emeya 900 (5-seat) — ¥828,000', msrp: 828000, tax: 58274, tax2025: 43274, ins: { low: 25000, base: 30950, high: 40950 }, kwh100: 24, tyreSet: 11000, tyreLife: 20000 },
-    { id: '900_4',label: 'Emeya 900 (4-seat) — ¥873,000', msrp: 873000, tax: 62257, tax2025: 47257, ins: { low: 26000, base: 32000, high: 42000 }, kwh100: 24, tyreSet: 11000, tyreLife: 20000 },
-    { id: 'gold', label: 'Emeya 900 GOLD — ¥918,000',   msrp: 918000, tax: 66239, tax2025: 51239, ins: { low: 27000, base: 33500, high: 44000 }, kwh100: 24, tyreSet: 12000, tyreLife: 20000 },
+    {
+      id: '600se',
+      label: 'Emeya 600 SE — 已购入 / owned',
+      msrp: 588000,
+      /* 450 kW, 4.15 s, 102 kWh pack; adds panoramic roof, rear-wheel steering,
+         20-way massage seats over the base 600. */
+      kwh100: 22, tyreSet: 9500, tyreLife: 24000,
+      /* Commercial premium at the ¥588,000 list price; scaled by invoice below. */
+      commercial: { low: 19050, base: 23550, high: 32050 },
+    },
   ],
-  defaultVariant: '600',
+  defaultVariant: '600se',
   inputs: [
+    { id: 'invoice', label: '成交价 Invoice total', unit: 'CNY incl. VAT', type: 'number',
+      min: 588000, max: 900000, step: 1000, def: 638000,
+      hint: 'What you actually paid the dealer, VAT included, options and dealer-fitted accessories ' +
+            'included. This is the purchase-tax base — change it and every tax line recomputes.' },
     { id: 'km',      label: 'Distance driven', unit: 'km/year', type: 'range', min: 3000, max: 40000, step: 1000, def: 15000 },
     { id: 'chargeMix', label: 'Home charging share', unit: '%', type: 'range', min: 0, max: 100, step: 10, def: 40,
       hint: 'A rented loft almost never allows a private wallbox, so the base case leans on public chargers.' },
@@ -270,25 +302,62 @@ const emeya = {
 
   oneTime(c) {
     const v = c.v;
+    const invoice = c.in.invoice;
+    const options = Math.max(0, invoice - v.msrp);
+    const t = nevPurchaseTax(invoice);
+    /* With the cap binding, each extra yuan of options carries the full 10%. */
+    const optionTax = t.capBinds ? (options / 1.13) * 0.10 : (options / 1.13) * 0.05;
+    const t2025 = (() => {
+      const g = t.gross;
+      return g - Math.min(g / 2, 30000); // 2025 rule: relief capped at ¥30,000
+    })();
+    const luxHeadroom = LUXURY_TAX_THRESHOLD_EX_VAT - t.base;
+
     return [
-      it('capital', 'Vehicle MSRP (指导价, VAT-incl.)', v.msrp, { src: SRC.emeyaPrice }),
-      it('tax', '车辆购置税 — 2026 half-rate, relief capped at ¥15,000', v.tax, {
-        src: SRC.nevTax,
-        note: `MSRP ÷ 1.13 × 10% = ¥${Math.round(v.msrp / 1.13 * 0.1).toLocaleString()}, less the ¥15,000 cap. Buying before 2026-01-01 would have cost ¥${v.tax2025.toLocaleString()} — the cliff is exactly ¥15,000.`,
+      it('capital', `成交价 — invoice total (指导价 ${cny(v.msrp)} + ${cny(options)} options)`, invoice, {
+        src: SRC.emeyaPcauto,
+        note: `The 600 SE lists at ${cny(v.msrp)}. Your invoice is ${cny(invoice)}, so ${cny(options)} of that is ` +
+              `options and dealer-fitted extras. Lotus sells at a national uniform retail price with little ` +
+              `discounting, so treat the list price as the floor.`,
       }),
-      it('tax', '超豪华小汽车消费税', 0, { src: SRC.luxTax, note: 'Threshold is ¥900,000 ex-VAT (≈¥1,017,000 incl. VAT). Even the GOLD sits under it — but a heavily optioned car could cross, adding 10% of retail.' }),
+      it('tax', '车辆购置税 — 2026 half-rate, relief capped at ¥15,000', t.payable, {
+        src: SRC.nevTax,
+        note: `${cny(invoice)} ÷ 1.13 = ${cny(t.base)} ex-VAT base; × 10% = ${cny(t.gross)}. The 2026–2027 NEV rule ` +
+              `halves that to ${cny(t.gross / 2)}, but the relief is capped at ¥15,000 — and ${cny(t.gross / 2)} is ` +
+              `${t.capBinds ? 'above' : 'below'} the cap, so ${t.capBinds ? 'the cap binds and you pay' : 'you pay'} ` +
+              `${cny(t.payable)}. Your ${cny(options)} of options added ${cny(optionTax)} of tax on their own, because ` +
+              `once the cap binds every extra yuan is taxed at the full 10% rather than 5%. ` +
+              `The same car invoiced on or before 2025-12-31 would have paid ${cny(t2025)} — the 2026 cliff is exactly ¥15,000.`,
+      }),
+      it('tax', '超豪华小汽车消费税 (10% retail)', 0, {
+        src: SRC.luxTax,
+        note: `Not liable. The threshold is ¥900,000 EX-VAT, i.e. about ¥1,017,000 on the invoice. Your ex-VAT base ` +
+              `is ${cny(t.base)}, leaving ${cny(luxHeadroom)} of headroom — you could option a further ` +
+              `${cny(luxHeadroom * 1.13)} on the invoice before this 10% tax switches on. Note the base includes ` +
+              `accessories, trim packages and services billed with the car.`,
+      }),
       it('tax', '深圳纯电动指标 (BEV plate quota)', 0, { src: SRC.szQuota, note: 'No volume cap, no lottery, no auction — allocated on eligibility review. The non-hukou concession expires 2026-12-31.' }),
       it('fees', '上牌 / 号牌工本费 / 临牌', c.pick({ low: 300, base: 500, high: 1500 }), { est: true }),
     ];
   },
   annual(c) {
     const v = c.v, km = c.in.km, homeShare = c.in.chargeMix / 100;
+    const invoice = c.in.invoice;
     const kwh = km / 100 * v.kwh100;
     const rate = this.rates.home * homeShare + this.rates.public * (1 - homeShare);
+    /* 车损险 tracks the sum insured, so the options you paid for are insured too. */
+    const commercial = c.pick(v.commercial) * (invoice / v.msrp);
     return [
-      it('insurance', '交强险 + 商业险 (车损 + 300万三者 + 不计免赔)', c.pick(v.ins), {
+      it('insurance', '交强险 (compulsory third-party)', c.pick({ low: 665, base: 950, high: 950 }), {
+        src: SRC.cpicJqx,
+        note: 'Drops to ¥855 / ¥760 / ¥665 after one, two and three claim-free years. Guangdong has a floor around ¥617–665 — the national ¥475 floor does not apply here.',
+      }),
+      it('insurance', '商业险 (车损 + 300万三者 + 不计免赔 + 车上人员)', commercial, {
         src: SRC.cpicNev, est: true,
-        note: 'Weakest number here. The Emeya has almost no Chinese loss history, so insurers load it hard. Get three real quotes.',
+        note: `Scaled to your ${cny(invoice)} invoice, because 车损险 is priced off the sum insured — the ` +
+              `${cny(invoice - v.msrp)} of options are insured too, at roughly 0.5–1.2% of pre-tax value with NEVs ` +
+              `loaded about 60%. This is the weakest number in the model: the Emeya has almost no Chinese loss ` +
+              `history, so insurers price it defensively. Get three real quotes.`,
       }),
       it('energy', `Charging — ${Math.round(kwh).toLocaleString()} kWh at ¥${rate.toFixed(2)}/kWh`, kwh * rate, {
         src: SRC.emeyaOwner,
@@ -939,6 +1008,18 @@ export const CAVEATS = [
       'of home charging to ¥4,620/yr of public charging and makes a paid parking space mandatory rather than ' +
       'optional. The default here assumes 40% home charging for that reason.',
     src: SRC.szElecConvert,
+  },
+  {
+    tag: 'Options are taxed, and above ¥339,000 they are taxed at the full rate',
+    body:
+      'The 车辆购置税 base is everything you actually paid the seller excluding VAT, so factory options ' +
+      'and dealer-fitted accessories invoiced with the car are inside it. The 2026–2027 NEV rule halves ' +
+      'the 10% rate but caps the relief at ¥15,000 per car, which means the cap binds above roughly ' +
+      '¥339,000 on the invoice — and beyond that point every extra yuan of options carries the full 10%, ' +
+      'not 5%. On a ¥638,000 invoice the ¥50,000 of options cost ¥4,425 in tax by themselves. Keep ' +
+      'accessories on a separate invoice where the dealer legitimately can; bundle them with the car and ' +
+      'you are paying tax on them.',
+    src: SRC.nevTaxQa,
   },
   {
     tag: 'The Emeya\'s real risk is repricing, not wear',
