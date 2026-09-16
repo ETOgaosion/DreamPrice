@@ -245,6 +245,7 @@ export const SRC = {
   shPlateRules:  { t: '《上海市非营业性客车额度拍卖管理规定》第七条 — 参拍资格',           u: 'https://www.shanghai.gov.cn/202502zfwj/20250220/2bbe56dd85584b51ab7e0982238baafe.html' },
   shPlateFaq:    { t: '上海市交通委 — 名下有外牌车辆可直接参拍，无需注销',                 u: 'https://jtw.sh.gov.cn/zcgd/20241231/5937514701f54d0091a349f29030ac77.html' },
   shPlateResult: { t: '上海市交通委 — 2026年第8次拍卖: 均价 ¥93,868, 中标率 14.4%',      u: 'https://jtw.sh.gov.cn/xydt/20260831/b4315f6409ac4d749ffeb4fe44547965.html' },
+  shNevPlate:    { t: '沪府办规〔2025〕21号 — 新能源汽车专用牌照额度免费发放条件',        u: 'https://www.shanghai.gov.cn/202603bgtwj/20260210/84cb024ac225492f82d4039da1fe320f.html' },
   gdVesselTax:   { t: '广东省财政厅 — 粤府〔2022〕81号 车船税税额表',                    u: 'http://czt.gd.gov.cn/gkmlpt/content/4/4028/post_4028842.html' },
   ferrari7yr:    { t: 'Ferrari 中国 — 7年原厂保养计划 (Genuine Maintenance)',           u: 'https://www.ferrari.com/zh-CN/auto/car-part-services-warranty-maintenance' },
   ferrariSzDealer:{ t: '骏佳行 — the only Ferrari dealer in Shenzhen, service in 坂田',  u: 'https://shenzhen.ferraridealers.com/zh-CN/about-us' },
@@ -297,7 +298,7 @@ const emeya = {
   owned: true,
   flag: '🇨🇳',
   name: 'Lotus Emeya 600 SE',
-  nativeName: '莲花跑车 Emeya 600 SE · 已购入 · 深圳',
+  nativeName: '莲花跑车 Emeya 600 SE · 已购入 · 沪牌在深圳使用',
   place: 'Shenzhen, China',
   currency: 'CNY',
   accent: '#f5c542',
@@ -395,22 +396,27 @@ const emeya = {
               `${cny(luxHeadroom * 1.13)} on the invoice before this 10% tax switches on. Note the base includes ` +
               `accessories, trim packages and services billed with the car.`,
       }),
-      it('tax', '深圳纯电动指标 (BEV plate quota)', 0, {
-        src: SRC.szQuota, frequencyLabel: 'one-off',
+      it('tax', '沪牌 — 新能源汽车专用牌照额度 (green plate)', 0, {
+        src: SRC.shNevPlate, frequencyLabel: 'one-off',
         facts: [
-          ['BEV quota volume cap', 'none'],
-          ['Lottery / auction', 'neither — eligibility review only'],
-          ['Petrol plate by comparison', 'lottery or auction'],
-          ['Quota validity once issued', '6 months'],
-          ['Non-hukou concession ends', '2026-12-31'],
+          ['Cost', '¥0 — 免费发放, not the ¥93,868 auction'],
+          ['Applies to', 'new-energy cars used 非营运'],
+          ['Eligibility used here', '居住证 + 36 of the last 48 months of 社保/个税'],
+          ['Faster alternative', '居住证积分达标 + 6 months continuous'],
+          ['Also requires', 'no existing 专用牌照额度 and no 客车额度'],
+          ['Policy term', '2026-01-01 to 2026-12-31, renewed annually'],
+          ['粤B by comparison', 'BEV quota also free, but needs 24 months of 深圳医保'],
         ],
-        note: 'No volume cap, no lottery, no auction — allocated on eligibility review. The non-hukou concession expires 2026-12-31.' }),
+        note: 'Shanghai hands the green-plate quota over free to a qualifying buyer — this is a different ' +
+              'thing from the ¥93,868 客车额度 auction, and holding it does not stop you bidding in that ' +
+              'auction later. The residency bar is the real gate, and clearing it once has a side effect ' +
+              'worth knowing: it is the same bar the 沪牌 auction applies.' }),
       it('fees', '上牌 / 号牌工本费 / 临牌', c.pick({ low: 300, base: 500, high: 1500 }), {
-        est: true, frequencyLabel: 'one-off', src: SRC.szQuota,
+        est: true, frequencyLabel: 'one-off', src: SRC.shNevPlate,
         facts: [
           ['Plate blanks + temp plate + admin', '¥300–1,500'],
-          ['Official Shenzhen fee schedule', 'none published — this is the weakest line here'],
-          ['Linked source covers', 'the registration rules, not the fee'],
+          ['Official fee schedule', 'none published — this is the weakest line here'],
+          ['Linked source covers', 'the quota rules, not the fee'],
         ] }),
     ];
   },
@@ -526,6 +532,20 @@ const emeya = {
           ['NEV battery safety test', 'mandatory from 2025-03-01 (GB/T 44500-2024)'],
         ],
         note: 'No physical inspection for the first 6 years. Void if the car causes a serious accident or is illegally modified.' }),
+      it('fees', '深圳限外 — 沪牌 is a non-粤B plate here', 0, {
+        src: SRC.szOutOfTown, frequencyLabel: 'per year', informational: true,
+        facts: [
+          ['Banned', 'Mon–Fri 07:00–09:00 and 17:30–19:30, citywide'],
+          ['Green plates exempt?', 'No — 含燃油、新能源、混动'],
+          ['Exemptions', 'HK, Macau and consular plates only'],
+          ['Free days', '1/month citywide + 2/month each in 盐田, 光明, 大鹏'],
+          ['Motorways and port roads', 'open throughout'],
+          ['Weekends & public holidays', 'unrestricted'],
+          ['Penalty', 'first 2 free per notice period, then ¥300 + 1 point'],
+        ],
+        note: 'Costs nothing, but it shapes how the car can be used: a Shanghai green plate gets no ' +
+              'concession in Shenzhen, so the Emeya is off the road on weekday peaks like any other ' +
+              'out-of-town car. For weekend driving it never bites.' }),
     ];
   },
 };
@@ -551,11 +571,9 @@ const ferrari = {
       cc: 3855, lPer100: { low: 11.2, base: 15, high: 18 },
       ins: { low: 55000, base: 70000, high: 100000 },
       dep: { low: 0.07, base: 0.10, high: 0.15 },
-      warn: '深圳 blocks a 粤B plate in your own name while you keep the Emeya: 第十五条(三) requires no ' +
-            'car registered in Shenzhen, and 第十六条 grants a second quota for 新能源 only. Selling the ' +
-            'Emeya reopens it, but only after its 纯电动 renewal entitlement lapses at six months. A 沪牌 ' +
-            'works today — Shanghai ignores out-of-town cars — at ~¥94,000 plus a year of Shanghai social ' +
-            'insurance. Pick the plate route before the budget.',
+      warn: 'The plate is not a problem. 第十五条(三) only counts cars registered in Shenzhen, and the ' +
+            'Emeya wears a 沪牌 — so you can bid 个人竞价 in your own name at roughly ¥11,670. Needs ' +
+            '深圳户籍, or a 居住证 with 24 months of 深圳医保.',
     },
   ],
   defaultVariant: 'amalfi',
@@ -564,14 +582,14 @@ const ferrari = {
       min: 0, max: 900000, step: 10000, def: 300000,
       hint: 'Taxed twice over: 10% purchase tax and 10% luxury tax.' },
     { id: 'km', label: 'Distance driven', unit: 'km/year', type: 'range', min: 2000, max: 20000, step: 1000, def: 6000 },
-    { id: 'plate', label: '牌照 route', type: 'select', def: 'company',
+    { id: 'plate', label: '牌照 route', type: 'select', def: 'personal',
       options: [
-        { v: 'company', l: '粤B 单位竞价 — company name, ~¥11,000' },
-        { v: 'family', l: '粤B 个人竞价 — a family member, ~¥13,000' },
-        { v: 'shanghai', l: '沪牌 拍卖 — ~¥94,000, in your own name' },
+        { v: 'personal', l: '粤B 个人竞价 — your own name, ~¥11,670' },
+        { v: 'company', l: '粤B 单位竞价 — company name, ~¥10,678' },
+        { v: 'shanghai', l: '沪牌 拍卖 — ~¥93,868, your own name' },
         { v: 'outoftown', l: '非粤B — free, banned on weekday peaks' },
       ],
-      hint: '粤B is closed to you personally while you own the Emeya.' },
+      hint: 'The 沪牌 Emeya does not count: 第十五条(三) only counts 深圳 cars.' },
   ],
   rates: { petrol: 11.00 },
 
@@ -584,8 +602,9 @@ const ferrari = {
     const luxOnOptions = (options / 1.13) * 0.10;
     const luxEmbedded = (v.msrp / 1.13) * 0.10;
     const plate = {
-      company: 11000,
-      family: 13000,
+      /* 深圳 竞价 has fallen all year: 第5期 ¥16,421 → 第8期 ¥11,670. */
+      personal: c.pick({ low: 10500, base: 11670, high: 16500 }),
+      company: c.pick({ low: 10200, base: 10678, high: 14000 }),
       /* 沪牌 clears in a narrow band every month; 2026 has run ¥93,600–94,391. */
       shanghai: c.pick({ low: 93600, base: 93868, high: 94400 }),
       outoftown: 0,
@@ -642,8 +661,8 @@ const ferrari = {
               'case saw a Bentley buyer billed ¥373,000 as if it were withholding on their behalf.',
       }),
       it('tax', {
+        personal: '粤B 牌照 — 个人竞价, in your own name',
         company: '粤B 牌照 — 单位竞价, titled to a company',
-        family: '粤B 牌照 — 个人竞价 in a family member\u2019s name',
         shanghai: '沪牌 — 个人非营业性客车额度拍卖',
         outoftown: '非粤B 牌照 — free, and restricted',
       }[c.in.plate], plate, {
@@ -651,9 +670,11 @@ const ferrari = {
           : c.in.plate === 'outoftown' ? SRC.szOutOfTown
           : SRC.szPlateAuction,
         frequencyLabel: 'one-off',
-        est: c.in.plate === 'shanghai',
+        est: c.in.plate === 'shanghai' || c.in.plate === 'personal',
         formula: c.in.plate === 'shanghai'
           ? '2026 monthly averages ¥93,600–94,391; 第8期 均价 ¥93,868 used here'
+          : c.in.plate === 'personal'
+          ? '2026 第8期 个人均价 ¥11,670; 第5期 was ¥16,421, so the high case holds that'
           : undefined,
         facts: c.in.plate === 'shanghai'
           ? [
@@ -690,43 +711,42 @@ const ferrari = {
             ['Alternative qualifiers', '¥50M fixed assets, or a ¥200M new project'],
             ['Codes per cycle at ¥50k tax', '1'],
             ['单位 share of 普通 quota', '12% — the other 88% is 个人'],
-            ['Buying it off the company later', 'needs a personal quota you cannot get'],
+            ['Saving vs your own name', '≈¥1,000 — not worth the loss of title'],
           ]
           : [
             ['2026 第8期 个人均价', '¥11,670'],
             ['Auction reserve floor', '¥10,000'],
             ['2026 第5期 个人均价', '¥16,421 — falling all year'],
-            ['Lottery odds, 第7期', '0.112%'],
-            ['Annual 普通 quota cap', '80,000'],
-            ['BEV quota by comparison', 'free, uncapped, no lottery'],
-            ['Blocked while you own the Emeya', '第十五条(三)'],
-            ['Opens if you sell it and wait', '6 months for the 纯电动 renewal to lapse'],
-            ['Emeya renewal quota type', '纯电动 — 第六十一条(一), no use for a V8'],
-            ['Lending the plate is banned', '第七十八条 — 3-year ban if caught'],
+            ['Your 沪牌 Emeya', 'does not count — 第十五条(三) reads 在本市登记'],
+            ['What 第十五条 does require', '深圳户籍, or 居住证 + 24 months 深圳医保'],
+            ['Lottery instead of auction', '0.112% odds, 第7期 — free but hopeless'],
+            ['Annual 普通 quota cap', '80,000, split 摇号 / 竞价 50:50'],
+            ['个人 share', '88% of 普通 quota'],
+            ['Quota validity once won', '6 months'],
           ],
         note: {
+          personal:
+            'The obvious route, and it is open. 第十五条(三) disqualifies you only for a car 在本市登记 — ' +
+            'registered in Shenzhen — and the Emeya carries a 沪牌, so it is invisible to this test. The ' +
+            'binding condition is residency: 深圳户籍, or a 居住证 backed by 24 continuous months of ' +
+            '深圳医保. Clear that and you bid like anyone else, at a price that has fallen from ¥16,421 ' +
+            'in 第5期 to ¥11,670 in 第8期. The car is yours, and it wears a 粤B plate, so none of the ' +
+            'weekday peak restrictions apply.',
           company:
             '第七十八条 says a quota may only be used by whoever won it, so a 单位 quota forces the car ' +
             'onto the company\u2019s name — the 行驶证, the insurance and the 车船税 are all the firm\u2019s. ' +
-            'The firm needs ¥50,000 of Shenzhen tax paid over the last 12 months to qualify at all. The ' +
-            'trap is the exit: transferring the car to yourself later is a 转让登记 that needs a personal ' +
-            'quota, which 第十五条(三) still refuses you while the Emeya is registered in Shenzhen.',
-          family:
-            'Cheap, but the plate and the car both belong to whoever bids. 第十五条(三) closes 个人竞价 to ' +
-            'you personally for as long as the Emeya is registered in Shenzhen — sell it, let the 纯电动 ' +
-            'renewal entitlement lapse after six months, and you can bid in your own name instead.',
+            'It also needs ¥50,000 of Shenzhen tax paid over the last 12 months. Since 个人竞价 is open ' +
+            'to you, this route now saves about ¥1,000 and costs you the title. Take it only if you ' +
+            'cannot meet the residency test yourself.',
           shanghai:
-            'The one route that puts a petrol Ferrari on a plate in your own name. Shanghai only excludes ' +
-            'people who already hold a Shanghai quota or a car registered on one — the 交通委 FAQ says a ' +
-            'car on another city\u2019s plate needs no deregistration — so the Emeya is irrelevant here. ' +
-            'The real price is not the ¥93,868: it is 上海居住证 plus twelve unbroken months of Shanghai ' +
-            'social insurance or income tax, then roughly seven monthly auctions at a 14% win rate. And ' +
-            'in Shenzhen a 沪牌 is just another 非粤B plate, banned on the same weekday peaks — so it only ' +
-            'pays for itself if the car is actually kept in Shanghai.',
+            'Legal, and you probably already qualify — a 沪牌 on the Emeya means you cleared Shanghai\u2019s ' +
+            'residency bar, and the free green-plate quota does not block the auction. But it makes no ' +
+            'sense here: ¥93,868 against ¥11,670 for a 粤B, and in Shenzhen a 沪牌 is just another 非粤B ' +
+            'plate banned on weekday peaks. Worth it only if the car lives in Shanghai.',
           outoftown:
-            'Free, and for a car you drive at weekends the restriction barely bites: the ban is weekday ' +
-            'peaks only, and weekends and public holidays are untouched. This is the rational choice ' +
-            'unless you need the car on a Tuesday morning.',
+            'Free, and for a weekend car the restriction barely bites — weekday peaks only, weekends and ' +
+            'public holidays untouched. But 粤B 个人竞价 is open to you at ¥11,670, and that buys a plate ' +
+            'with no restrictions at all. Hard to justify saving the money now.',
         }[c.in.plate],
       }),
       it('fees', '上牌 / 号牌工本费', c.pick({ low: 373, base: 500, high: 1500 }), {
@@ -2018,36 +2038,44 @@ export const CAVEATS = [
     src: SRC.szElecConvert,
   },
   {
-    tag: 'The personal 粤B route is blocked by the Emeya, not closed forever',
+    tag: 'The Emeya wears a 沪牌, so the Ferrari can take a 粤B in your own name',
     body:
-      'The gate is conditional. 《深圳市小汽车增量调控管理实施细则》第十五条(三) grants the petrol-capable ' +
-      '普通小汽车增量指标 only to an applicant with no car registered in Shenzhen, and 第十六条 grants a ' +
-      'second quota for 新能源 only — so while the Emeya sits on your 行驶证 you cannot bid for a petrol ' +
-      'quota in your own name. Give up the Emeya and the same door opens, but not immediately: 第六十一条' +
-      '(一) matches a renewal quota to the original type, so the Emeya yields a 纯电动 renewal quota that ' +
-      'cannot register a Ferrari. You would have to let that entitlement lapse — 第五十九条 gives you six ' +
-      'months to claim it — and only then does 第十五条 see you as carless and unentitled, free to enter ' +
-      'the 竞价 at roughly ¥11,670 or the 摇号 at 0.112% odds. Keeping the Emeya, the alternatives are a ' +
-      'company quota, a family member who owns no Shenzhen car, a 沪牌, or a free non-粤B plate. And the ' +
-      'cleanest answer is a different Ferrari: the 296 GTB is a plug-in hybrid, so it qualifies for the ' +
-      'free, uncapped 混合动力 quota as a second car and the plate problem disappears entirely.',
+      'Both cities write their exclusions in local terms, and that is what decides this. ' +
+      '《深圳市小汽车增量调控管理实施细则》第十五条(三) disqualifies an applicant who owns a car ' +
+      '在本市登记 — registered in Shenzhen. A Shanghai-plated Emeya is not, so it does not count against ' +
+      'you, and the petrol-capable 普通小汽车增量指标 is yours to bid for like anyone else. What the ' +
+      'article does demand is residency: 深圳户籍, or a 居住证 backed by 24 continuous months of 深圳医保. ' +
+      'The auction has been getting cheaper all year — ¥16,421 in 第5期, ¥11,670 in 第8期, against a ' +
+      '¥10,000 floor — and the lottery alternative is free but hopeless at 0.112%. The company route and ' +
+      'the out-of-town plate both exist, but they now cost you either the title or the weekday peaks to ' +
+      'save about ¥1,000 and ¥11,670 respectively.',
     src: SRC.szPlateRules,
   },
   {
-    tag: 'A 沪牌 is the only route that works in your own name — and it is the dearest',
+    tag: 'A 沪牌 for the Ferrari is available and pointless',
     body:
-      'Shanghai\u2019s exclusion is narrower than Shenzhen\u2019s. 《上海市非营业性客车额度拍卖管理规定》' +
-      '第七条 bars you only if you already hold a Shanghai 客车额度 or a car registered on one; the 交通委 ' +
-      'FAQ states plainly that a car on another city\u2019s plate can stay registered. So the Emeya, which ' +
-      'closes every 粤B door, is invisible in Shanghai. Two things make it expensive anyway. First, the ' +
-      'quota cleared at ¥93,868 in 2026 第8期 against a ¥92,900 floor, with a 14.4% win rate — eight times ' +
-      'the 粤B price and several months of bidding. Second, a non-沪籍 applicant needs a 上海居住证 plus ' +
-      'twelve unbroken months of Shanghai social insurance or income tax; the February 2025 revision cut ' +
-      'that from three years to one, which is what makes this route thinkable at all. The catch that ' +
-      'decides it: driven in Shenzhen, a 沪牌 is just another 非粤B plate under the same weekday peak ban, ' +
-      'so ¥93,868 buys you nothing a free out-of-town plate does not already give you — unless the car ' +
-      'lives in Shanghai.',
+      'Shanghai excludes you only if you already hold a 客车额度 or a car registered on one. The Emeya\u2019s ' +
+      'green plate is a 新能源专用牌照额度, a different instrument, and the 交通委 FAQ confirms that neither ' +
+      'a new-energy car nor an out-of-town plate blocks the auction. The residency bar is already behind ' +
+      'you too: the green plate required 36 of the last 48 months of Shanghai social insurance, comfortably ' +
+      'more than the 12 the auction asks for since the February 2025 revision. So you could bid — at ' +
+      '¥93,868 in 2026 第8期, eight times the 粤B price, with a 14.4% win rate. And the plate you would ' +
+      'win is, in Shenzhen, just another 非粤B plate under the weekday peak ban. It only makes sense if ' +
+      'the car lives in Shanghai.',
     src: SRC.shPlateFaq,
+  },
+  {
+    tag: 'Your Shanghai green plate is restricted in Shenzhen',
+    body:
+      'This costs nothing but shapes the whole plan. Shenzhen\u2019s 限外 notice covers 非本市核发机动车号牌 ' +
+      'load-carrying cars 含燃油、新能源、混动 — new-energy plates get no concession — and bans them ' +
+      'citywide on weekdays from 07:00 to 09:00 and 17:30 to 19:30. Only Hong Kong, Macau and consular ' +
+      'plates are exempt. Motorways and the port and airport approach roads stay open, you get one free ' +
+      'day a month citywide plus two each in 盐田, 光明 and 大鹏, and the first two violations in each ' +
+      'notice period are unpunished before it becomes ¥300 and a point. Weekends and public holidays are ' +
+      'untouched, so for weekend driving none of this matters — but it is the reason a 粤B on the Ferrari ' +
+      'is worth its ¥11,670 rather than taking a free out-of-town plate to match the Emeya.',
+    src: SRC.szOutOfTown,
   },
   {
     tag: 'The Ferrari pays every tax the Emeya dodges',
