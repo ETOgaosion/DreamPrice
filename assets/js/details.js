@@ -24,15 +24,16 @@ function srcLink(src) {
   return `<div class="li-src"><a href="${src.u}" target="_blank" rel="noopener">${esc(src.t)}</a></div>`;
 }
 
-/* ---------------- hover card ----------------
- * One floating element reused by every line, rather than 80 tooltips in the
- * DOM. It follows the pointer and flips to stay on screen, and it also opens on
- * keyboard focus so the evidence is reachable without a mouse.
+/* ---------------- hover / pin card ----------------
+ * One floating element reused by every line. Hover follows the pointer; click
+ * pins it so touch and trackpad users can still read the evidence.
  */
 const hoverCard = el('div', 'hovercard');
 hoverCard.setAttribute('role', 'tooltip');
 hoverCard.hidden = true;
 document.body.append(hoverCard);
+
+let pinnedNode = null;
 
 const SCENARIO_LABEL = { low: 'Optimistic', base: 'Realistic', high: 'Pessimistic' };
 
@@ -76,7 +77,7 @@ function buildEvidence(item, band, currency) {
   if (item.src) {
     rows.push(`<div class="hc-src"><span>${esc(item.src.t)}</span>` +
       `<code>${esc(item.src.u.replace(/^https?:\/\//, '').slice(0, 64))}</code>` +
-      `<em>Click the link to open →</em></div>`);
+      `<em>Open the DATA link on the row →</em></div>`);
   }
   return rows.join('');
 }
@@ -85,30 +86,78 @@ function placeCard(ev) {
   const pad = 14;
   const { innerWidth: vw, innerHeight: vh } = window;
   const r = hoverCard.getBoundingClientRect();
-  let x = ev.clientX + pad;
-  let y = ev.clientY + pad;
-  if (x + r.width > vw - 8) x = Math.max(8, ev.clientX - r.width - pad);
+  let x = (ev?.clientX ?? 24) + pad;
+  let y = (ev?.clientY ?? 24) + pad;
+  if (x + r.width > vw - 8) x = Math.max(8, (ev?.clientX ?? 24) - r.width - pad);
   if (y + r.height > vh - 8) y = Math.max(8, vh - r.height - 8);
   hoverCard.style.left = `${x}px`;
   hoverCard.style.top = `${y}px`;
 }
 
-function attachHover(node, item, band, currency) {
-  const show = (ev) => {
-    hoverCard.innerHTML = `<div class="hc-title">${esc(item.label)}</div>` +
-      buildEvidence(item, band, currency);
-    hoverCard.hidden = false;
-    placeCard(ev.clientX !== undefined && ev.clientX !== 0
-      ? ev
-      : (() => { const b = node.getBoundingClientRect(); return { clientX: b.left, clientY: b.bottom }; })());
-  };
-  const hide = () => { hoverCard.hidden = true; };
-  node.addEventListener('mouseenter', show);
-  node.addEventListener('mousemove', (ev) => { if (!hoverCard.hidden) placeCard(ev); });
-  node.addEventListener('mouseleave', hide);
-  node.addEventListener('focusin', show);
-  node.addEventListener('focusout', hide);
+function fillCard(item, band, currency) {
+  hoverCard.innerHTML = `<div class="hc-title">${esc(item.label)}</div>` +
+    buildEvidence(item, band, currency);
 }
+
+function attachHover(node, item, band, currency) {
+  const pointer = (ev) => {
+    if (ev.clientX || ev.clientY) return ev;
+    const b = node.getBoundingClientRect();
+    return { clientX: b.left + Math.min(120, b.width / 2), clientY: b.bottom };
+  };
+  const show = (ev) => {
+    fillCard(item, band, currency);
+    hoverCard.hidden = false;
+    hoverCard.classList.toggle('is-pinned', pinnedNode === node);
+    placeCard(pointer(ev));
+  };
+  const hide = () => {
+    if (pinnedNode) return;
+    hoverCard.hidden = true;
+    hoverCard.classList.remove('is-pinned');
+  };
+  node.addEventListener('mouseenter', (ev) => {
+    if (pinnedNode && pinnedNode !== node) return;
+    show(ev);
+  });
+  node.addEventListener('mousemove', (ev) => {
+    if (hoverCard.hidden || pinnedNode) return;
+    placeCard(ev);
+  });
+  node.addEventListener('mouseleave', hide);
+  node.addEventListener('focusin', (ev) => {
+    if (pinnedNode && pinnedNode !== node) return;
+    show(ev);
+  });
+  node.addEventListener('focusout', (ev) => {
+    if (node.contains(ev.relatedTarget)) return;
+    hide();
+  });
+  /* Click pins the card so the evidence stays put; click again to dismiss.
+     Ignore clicks on the source link itself — that should navigate. */
+  node.addEventListener('click', (ev) => {
+    if (ev.target.closest('a')) return;
+    if (pinnedNode === node) {
+      pinnedNode = null;
+      hoverCard.hidden = true;
+      hoverCard.classList.remove('is-pinned');
+      node.classList.remove('is-pinned');
+      return;
+    }
+    if (pinnedNode) pinnedNode.classList.remove('is-pinned');
+    pinnedNode = node;
+    node.classList.add('is-pinned');
+    show(ev);
+  });
+}
+
+document.addEventListener('keydown', (ev) => {
+  if (ev.key !== 'Escape' || !pinnedNode) return;
+  pinnedNode.classList.remove('is-pinned');
+  pinnedNode = null;
+  hoverCard.hidden = true;
+  hoverCard.classList.remove('is-pinned');
+});
 
 /* Persist and redraw. Every per-asset control routes through here so the
    overview page sees the change on the next navigation. */
@@ -270,25 +319,34 @@ function card(asset, r) {
 
   /* breakdowns */
   const bands = scenarioBands(asset, state);
+  const assetKey = asset.id;
   c.append(lineBlock(
     asset.owned
       ? `Already paid 已付 — ${fmtCompact(r.upFront, cur)}`
       : `Up-front — ${fmtCompact(r.upFront, cur)}`,
     r.oneTime, cur, r.upFront,
     asset.owned ? 'Total 落地价 paid' : 'Total at purchase / move-in',
-    true, bands.oneTime,
+    true, bands.oneTime, `${assetKey}:oneTime`,
   ));
   c.append(lineBlock(
     `Every year — ${fmtCompact(r.annualRunning, cur)}`,
     r.annual, cur, r.annualRunning, 'Cost to keep it, per year', false, bands.annual,
+    `${assetKey}:annual`,
   ));
-  c.append(yearBlock(r, cur));
+  c.append(yearBlock(r, cur, `${assetKey}:years`));
 
   return c;
 }
 
-function lineBlock(summary, items, cur, total, totalLabel, isUpFront, bands) {
+function hostOf(url) {
+  try { return new URL(url).host.replace(/^www\./, ''); }
+  catch { return url.replace(/^https?:\/\//, '').split('/')[0]; }
+}
+
+function lineBlock(summary, items, cur, total, totalLabel, isUpFront, bands, blockKey) {
   const d = el('details', 'block');
+  /* Cost lines stay open on first visit so DATA links and evidence are visible. */
+  d.open = !openBlocks.has(`closed:${blockKey}`);
   d.append(el('summary', null, esc(summary)));
   const body = el('div', 'body');
   items.forEach((item, i) => {
@@ -300,15 +358,15 @@ function lineBlock(summary, items, cur, total, totalLabel, isUpFront, bands) {
       (item.informational ? ' <span class="pill info">context</span>' : '');
     top.append(el('div', 'li-lbl', esc(item.label) + pills));
 
-    /* A real link on every line, not a grey afterthought at the bottom. */
+    /* A real, labelled link on every line — host visible, not a grey afterthought. */
     if (item.src) {
       const a = el('a', 'li-link');
       a.href = item.src.u;
       a.target = '_blank';
       a.rel = 'noopener';
-      a.title = item.src.t;
-      a.setAttribute('aria-label', `Source: ${item.src.t}`);
-      a.innerHTML = '<span>data</span>';
+      a.title = `${item.src.t}\n${item.src.u}`;
+      a.setAttribute('aria-label', `Open source: ${item.src.t}`);
+      a.innerHTML = `<span>DATA</span><small>${esc(hostOf(item.src.u))}</small>`;
       top.append(a);
     }
 
@@ -317,10 +375,30 @@ function lineBlock(summary, items, cur, total, totalLabel, isUpFront, bands) {
     top.append(amt);
     li.append(top);
     if (item.note) li.append(el('p', 'li-note', esc(item.note)));
-    if (item.src) li.insertAdjacentHTML('beforeend', srcLink(item.src));
 
-    /* Hover anywhere on the row to see the evidence behind the number. */
+    /* Real data sits on the row itself — hover/click still opens the full card. */
+    if (item.formula) {
+      li.append(el('div', 'li-formula', esc(item.formula)));
+    }
+    if (item.facts?.length) {
+      const table = el('table', 'li-facts');
+      table.innerHTML = item.facts.map(([k, v]) =>
+        `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('');
+      li.append(table);
+    }
+    if (item.src) {
+      const src = el('div', 'li-src');
+      const a = el('a', null, esc(item.src.t));
+      a.href = item.src.u;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      src.append(a);
+      li.append(src);
+    }
+
+    /* Hover or click the row to see the full evidence card. */
     li.tabIndex = 0;
+    li.title = 'Hover or click for the full evidence card';
     attachHover(li, item, bands?.[i], cur);
     body.append(li);
   });
@@ -334,9 +412,10 @@ function lineBlock(summary, items, cur, total, totalLabel, isUpFront, bands) {
   return d;
 }
 
-function yearBlock(r, cur) {
+function yearBlock(r, cur, blockKey) {
   const d = el('details', 'block');
   const isCar = r.asset.kind === 'car';
+  d.open = openBlocks.has(blockKey);
   d.append(el('summary', null, `Year by year over ${r.schedule.length} year${r.schedule.length > 1 ? 's' : ''}`));
   const body = el('div', 'body');
   const table = el('table', 'yrs');
@@ -407,7 +486,7 @@ function renderStatic() {
 }
 
 /* ---------------- render ---------------- */
-/* Which <details> blocks the reader had open, so a re-render doesn't slam them shut. */
+/* Which <details> blocks the reader forced open/closed across re-renders. */
 const openBlocks = new Set();
 
 function render() {
@@ -415,12 +494,19 @@ function render() {
   renderChart(results);
   renderAssets(results);
 
-  document.querySelectorAll('.card').forEach((card, ci) => {
+  document.querySelectorAll('.card').forEach((card) => {
+    const assetId = ASSETS[[...document.querySelectorAll('.card')].indexOf(card)]?.id;
     card.querySelectorAll('details.block').forEach((d, di) => {
-      const key = `${ci}:${di}`;
-      if (openBlocks.has(key)) d.open = true;
+      const kind = di === 0 ? 'oneTime' : di === 1 ? 'annual' : 'years';
+      const key = `${assetId}:${kind}`;
       d.addEventListener('toggle', () => {
-        if (d.open) openBlocks.add(key); else openBlocks.delete(key);
+        if (kind === 'years') {
+          if (d.open) openBlocks.add(key); else openBlocks.delete(key);
+        } else {
+          /* Cost blocks default open; remember only when the reader closes them. */
+          if (d.open) openBlocks.delete(`closed:${key}`);
+          else openBlocks.add(`closed:${key}`);
+        }
       });
     });
   });

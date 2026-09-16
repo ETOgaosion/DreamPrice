@@ -341,7 +341,7 @@ details.block > summary:hover { color: var(--ink); background: rgba(255, 255, 25
 details.block .body { padding: 0.3rem 1.5rem 1.4rem; }
 
 /* line items */
-.li { border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding: 0.6rem 0; }
+.li { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
 .li:last-child { border-bottom: 0; }
 .li-top { display: flex; gap: 0.75rem; align-items: baseline; }
 .li-lbl { font-size: 0.86rem; flex: 1; }
@@ -353,22 +353,44 @@ details.block .body { padding: 0.3rem 1.5rem 1.4rem; }
   font-size: 0.85rem; line-height: 1.6; color: var(--ink-dim); margin: 0.45rem 0 0;
   border-left: 2px solid var(--line-2); padding-left: 0.75rem;
 }
-.li { border-radius: 8px; transition: background 0.12s ease; }
-.li:hover, .li:focus-visible {
+.li { border-radius: 8px; transition: background 0.12s ease; padding: 0.75rem 0.55rem; margin: 0 -0.55rem; }
+.li:hover, .li:focus-visible, .li.is-pinned {
   background: rgba(255, 255, 255, 0.035);
   outline: none; cursor: help;
   box-shadow: inset 2px 0 0 var(--accent);
 }
 
-/* A visible link on every calculated line. */
+/* A visible source chip on every calculated line. */
 .li-link {
-  flex: 0 0 auto; border: 1px solid var(--line-2); border-radius: 999px;
-  padding: 0.05rem 0.5rem; font-size: 0.62rem; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint);
-  background: var(--panel); text-decoration: none;
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.35rem;
+  border: 1px solid rgba(255, 209, 102, 0.45); border-radius: 999px;
+  padding: 0.18rem 0.55rem; font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent);
+  background: rgba(255, 209, 102, 0.08); text-decoration: none; max-width: 12rem;
 }
-.li-link::after { content: ' ↗'; letter-spacing: 0; }
+.li-link span { white-space: nowrap; }
+.li-link small {
+  font-size: 0.58rem; font-weight: 600; letter-spacing: 0; text-transform: none;
+  color: var(--ink-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 7.5rem;
+}
+.li-link::after { content: '↗'; letter-spacing: 0; color: var(--accent); }
 .li-link:hover { color: #0b0c12; background: var(--accent); border-color: var(--accent); }
+.li-link:hover small, .li-link:hover::after { color: #0b0c12; }
+
+.li-formula {
+  margin-top: 0.45rem; font-family: var(--mono); font-size: 0.74rem; color: var(--ink);
+  background: rgba(255, 255, 255, 0.04); border-radius: 7px; padding: 0.4rem 0.55rem;
+  word-break: break-word; border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.li-facts {
+  width: 100%; border-collapse: collapse; margin-top: 0.45rem; font-size: 0.78rem;
+}
+.li-facts td { padding: 0.18rem 0; vertical-align: top; color: var(--ink-dim); }
+.li-facts td:last-child {
+  text-align: right; font-family: var(--mono); font-size: 0.76rem;
+  color: var(--ink); white-space: nowrap; padding-left: 0.75rem;
+}
 
 .li-src { font-size: 0.72rem; margin-top: 0.35rem; }
 .li-src a { color: var(--ink-faint); border-bottom-color: transparent; }
@@ -411,12 +433,17 @@ table.yrs .dim { color: var(--ink-faint); }
 
 /* ---------- hover card: the evidence behind a number ---------- */
 .hovercard {
-  position: fixed; z-index: 90; width: min(400px, calc(100vw - 20px));
+  position: fixed; z-index: 200; width: min(400px, calc(100vw - 20px));
   background: #10121b; border: 1px solid var(--line-2); border-radius: 12px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); padding: 0.9rem 1rem;
   pointer-events: none; font-size: 0.8rem; line-height: 1.5;
 }
-.hovercard[hidden] { display: none; }
+.hovercard.is-pinned {
+  pointer-events: auto;
+  border-color: rgba(255, 209, 102, 0.55);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 209, 102, 0.2);
+}
+.hovercard[hidden] { display: none !important; }
 .hc-title {
   font-weight: 700; font-size: 0.86rem; margin-bottom: 0.5rem; line-height: 1.35;
   padding-bottom: 0.5rem; border-bottom: 1px solid var(--line);
@@ -457,9 +484,6 @@ table.yrs .dim { color: var(--ink-faint); }
 .hc-src span { font-size: 0.75rem; color: var(--ink-dim); }
 .hc-src code { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-faint); word-break: break-all; }
 .hc-src em { font-style: normal; font-size: 0.68rem; color: var(--accent); font-weight: 600; }
-
-/* Touch devices have no hover, so the card would only ever flash. */
-@media (hover: none) { .hovercard { display: none !important; } }
 
 /* ---------- narrow screens ---------- */
 @media (max-width: 680px) {
