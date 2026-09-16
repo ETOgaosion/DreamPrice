@@ -679,20 +679,35 @@ const ferrari = {
             ['Current notice', '2026-09-17 to 2027-09-16'],
             ['Exempt plates', 'HK, Macau and consular'],
           ]
+          : c.in.plate === 'company'
+          ? [
+            ['2026 第8期 单位均价', '¥10,678'],
+            ['Auction reserve floor', '¥10,000'],
+            ['Quota is non-transferable', '第七十八条 — 仅限指标获得者使用'],
+            ['So the owner on the 行驶证 is', 'the company, not you'],
+            ['Company must have paid', '¥50,000 of Shenzhen tax in 12 months'],
+            ['Alternative qualifiers', '¥50M fixed assets, or a ¥200M new project'],
+            ['Codes per cycle at ¥50k tax', '1'],
+            ['单位 share of 普通 quota', '12% — the other 88% is 个人'],
+            ['Buying it off the company later', 'needs a personal quota you cannot get'],
+          ]
           : [
             ['2026 第8期 个人均价', '¥11,670'],
-            ['2026 第8期 单位均价', '¥10,678'],
             ['Auction reserve floor', '¥10,000'],
             ['2026 第5期 个人均价', '¥16,421 — falling all year'],
             ['Lottery odds, 第7期', '0.112%'],
             ['Annual 普通 quota cap', '80,000'],
             ['BEV quota by comparison', 'free, uncapped, no lottery'],
             ['Closed to you personally', '第十五条(三) — you own the Emeya'],
+            ['Lending the plate is banned', '第七十八条 — 3-year ban if caught'],
           ],
         note: {
           company:
-            'A company quota needs a Shenzhen-registered firm that paid ¥50,000 of local tax last year, ' +
-            'and the car is titled to the company, not to you.',
+            '第七十八条 says a quota may only be used by whoever won it, so a 单位 quota forces the car ' +
+            'onto the company\u2019s name — the 行驶证, the insurance and the 车船税 are all the firm\u2019s. ' +
+            'The firm needs ¥50,000 of Shenzhen tax paid over the last 12 months to qualify at all. The ' +
+            'trap is the exit: transferring the car to yourself later is a 转让登记 that needs a personal ' +
+            'quota, which 第十五条(三) still refuses you while the Emeya is registered in Shenzhen.',
           family:
             'Cheap, but the plate and the car both belong to whoever bids. 第十五条(三) closes 个人竞价 to ' +
             'you personally for as long as the Emeya is registered in Shenzhen.',
