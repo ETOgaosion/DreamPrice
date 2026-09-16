@@ -209,6 +209,7 @@ function card(asset, r) {
   const cur = asset.currency;
   const disp = state.currency;
   const c = el('article', 'card' + (state.enabled[asset.id] ? '' : ' disabled'));
+  c.id = asset.id;
   c.style.setProperty('--card-accent', asset.accent);
 
   /* head */

@@ -144,26 +144,93 @@ input[type='checkbox'] { accent-color: var(--accent); width: 15px; height: 15px;
 }
 
 .period table { width: 100%; border-collapse: collapse; }
-.period td { padding: 0.62rem 1.5rem; vertical-align: middle; }
+.period td { padding: 0.62rem 1rem 0.62rem 1.5rem; vertical-align: middle; }
 .period tbody tr {
   /* A tint behind each row shows its share without needing a separate chart. */
   background: linear-gradient(to right,
     color-mix(in srgb, var(--tint) 15%, transparent) var(--share, 0%),
     transparent var(--share, 0%));
   border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+  cursor: help;
 }
+.period tbody tr:hover, .period tbody tr.is-pinned, .period tbody tr:focus-visible {
+  outline: none;
+  box-shadow: inset 2px 0 0 var(--accent);
+  background: linear-gradient(to right,
+    color-mix(in srgb, var(--tint) 22%, transparent) var(--share, 0%),
+    rgba(255, 255, 255, 0.03) var(--share, 0%));
+}
+.period-total { cursor: help; }
+.period-total:hover, .upfront-inner:hover, .upfront-inner.is-pinned {
+  filter: brightness(1.05);
+}
+.upfront-inner { cursor: help; outline: none; }
 .period td.n { display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; }
 .period td.n .flag { font-size: 1.05rem; }
 .period td.n .nm { display: flex; flex-direction: column; line-height: 1.25; }
 .period td.n .nm small { color: var(--ink-faint); font-size: 0.72rem; }
+.period td.lnk {
+  width: 1%; white-space: nowrap; text-align: right; padding-inline: 0.4rem;
+}
+.period td.lnk .lnk-wrap {
+  display: inline-flex; gap: 0.35rem; justify-content: flex-end; align-items: center;
+}
 .period td.v {
   text-align: right; font-family: var(--mono); font-size: 0.94rem; white-space: nowrap;
+  padding-right: 1.5rem;
 }
 .period tfoot td {
   border-top: 1px solid var(--line-2); font-weight: 700; font-size: 0.88rem;
   padding-top: 0.8rem; padding-bottom: 0.9rem; background: rgba(0, 0, 0, 0.2);
+  cursor: help;
 }
 .period tfoot td.v { font-size: 1rem; color: var(--accent); }
+
+/* Row-level source chips on the overview tables. */
+.row-data, .hc-data {
+  display: inline-flex; align-items: center; gap: 0.28rem;
+  border: 1px solid rgba(255, 209, 102, 0.45); border-radius: 999px;
+  padding: 0.12rem 0.45rem; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent);
+  background: rgba(255, 209, 102, 0.08); text-decoration: none; max-width: 9.5rem;
+}
+.row-data small, .hc-data small {
+  font-size: 0.55rem; font-weight: 600; letter-spacing: 0; text-transform: none;
+  color: var(--ink-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 5.5rem;
+}
+.row-data::after, .hc-data::after { content: '↗'; }
+.row-data:hover, .hc-data:hover { color: #0b0c12; background: var(--accent); border-color: var(--accent); }
+.row-data:hover small, .hc-data:hover small, .row-data:hover::after, .hc-data:hover::after { color: #0b0c12; }
+.row-more {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-faint);
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.12rem 0.45rem;
+  text-decoration: none;
+}
+.row-more:hover { color: var(--accent); border-color: var(--accent); }
+
+.hc-title small {
+  display: block; font-size: 0.72rem; font-weight: 500; color: var(--ink-faint);
+  margin-top: 0.2rem; letter-spacing: 0;
+}
+.hc-lines { display: flex; flex-direction: column; gap: 0.55rem; max-height: 52vh; overflow: auto; }
+.hc-line {
+  padding: 0.45rem 0.5rem; border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.hc-line-top { display: flex; gap: 0.5rem; align-items: baseline; }
+.hc-line-lbl { flex: 1; font-size: 0.78rem; color: var(--ink); }
+.hc-line-lbl i { font-style: normal; color: #fdba74; font-size: 0.62rem; font-weight: 700; }
+.hc-line-amt { font-family: var(--mono); font-size: 0.78rem; white-space: nowrap; }
+.hc-line-formula {
+  margin-top: 0.3rem; font-family: var(--mono); font-size: 0.68rem; color: var(--ink-dim);
+  word-break: break-word;
+}
+.hc-line .hc-facts { margin-top: 0.25rem; }
+.hc-more {
+  display: inline-block; margin-top: 0.75rem; font-size: 0.74rem; font-weight: 600;
+  color: var(--accent); border-bottom-color: transparent;
+}
 /* Settings recap as chips — scannable, not a sentence to decode. */
 .periods-note {
   grid-column: 1 / -1; margin: 0.3rem 0 0;
