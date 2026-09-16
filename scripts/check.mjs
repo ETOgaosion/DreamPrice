@@ -372,7 +372,7 @@ check(readFileSync(join(root, 'details.html'), 'utf8').includes('index.html'),
 
 for (const f of [
   'assets/js/data.js', 'assets/js/model.js', 'assets/js/state.js',
-  'assets/js/overview.js', 'assets/js/details.js', 'assets/css/styles.css', '.nojekyll',
+  'assets/js/overview.js', 'assets/js/details.js', 'assets/js/hover.js', 'assets/css/styles.css', '.nojekyll',
 ]) {
   check(existsSync(join(root, f)), `${f} is present`);
 }

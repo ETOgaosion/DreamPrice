@@ -5,9 +5,11 @@ import {
   categoryBreakdown, convert, evaluateAll, fmt, fmtCompact, PERIODS, scenarioBands,
 } from './model.js';
 import { bindGlobalControls, loadState, saveState } from './state.js';
+import { createHoverController } from './hover.js';
 
 /* Shared with the overview page through localStorage. */
 const state = loadState();
+const hover = createHoverController({ showDelay: 320, hideDelay: 220 });
 
 /* ---------------- helpers ---------------- */
 const $ = (sel) => document.querySelector(sel);
@@ -25,16 +27,9 @@ function srcLink(src) {
 }
 
 /* ---------------- hover / pin card ----------------
- * One floating element reused by every line. Hover follows the pointer; click
- * pins it so touch and trackpad users can still read the evidence.
+ * Dwell before show; park beside the row; move onto the card without it
+ * chasing the cursor.
  */
-const hoverCard = el('div', 'hovercard');
-hoverCard.setAttribute('role', 'tooltip');
-hoverCard.hidden = true;
-document.body.append(hoverCard);
-
-let pinnedNode = null;
-
 const SCENARIO_LABEL = { low: 'Optimistic', base: 'Realistic', high: 'Pessimistic' };
 
 function buildEvidence(item, band, currency) {
@@ -82,82 +77,10 @@ function buildEvidence(item, band, currency) {
   return rows.join('');
 }
 
-function placeCard(ev) {
-  const pad = 14;
-  const { innerWidth: vw, innerHeight: vh } = window;
-  const r = hoverCard.getBoundingClientRect();
-  let x = (ev?.clientX ?? 24) + pad;
-  let y = (ev?.clientY ?? 24) + pad;
-  if (x + r.width > vw - 8) x = Math.max(8, (ev?.clientX ?? 24) - r.width - pad);
-  if (y + r.height > vh - 8) y = Math.max(8, vh - r.height - 8);
-  hoverCard.style.left = `${x}px`;
-  hoverCard.style.top = `${y}px`;
-}
-
-function fillCard(item, band, currency) {
-  hoverCard.innerHTML = `<div class="hc-title">${esc(item.label)}</div>` +
-    buildEvidence(item, band, currency);
-}
-
 function attachHover(node, item, band, currency) {
-  const pointer = (ev) => {
-    if (ev.clientX || ev.clientY) return ev;
-    const b = node.getBoundingClientRect();
-    return { clientX: b.left + Math.min(120, b.width / 2), clientY: b.bottom };
-  };
-  const show = (ev) => {
-    fillCard(item, band, currency);
-    hoverCard.hidden = false;
-    hoverCard.classList.toggle('is-pinned', pinnedNode === node);
-    placeCard(pointer(ev));
-  };
-  const hide = () => {
-    if (pinnedNode) return;
-    hoverCard.hidden = true;
-    hoverCard.classList.remove('is-pinned');
-  };
-  node.addEventListener('mouseenter', (ev) => {
-    if (pinnedNode && pinnedNode !== node) return;
-    show(ev);
-  });
-  node.addEventListener('mousemove', (ev) => {
-    if (hoverCard.hidden || pinnedNode) return;
-    placeCard(ev);
-  });
-  node.addEventListener('mouseleave', hide);
-  node.addEventListener('focusin', (ev) => {
-    if (pinnedNode && pinnedNode !== node) return;
-    show(ev);
-  });
-  node.addEventListener('focusout', (ev) => {
-    if (node.contains(ev.relatedTarget)) return;
-    hide();
-  });
-  /* Click pins the card so the evidence stays put; click again to dismiss.
-     Ignore clicks on the source link itself — that should navigate. */
-  node.addEventListener('click', (ev) => {
-    if (ev.target.closest('a')) return;
-    if (pinnedNode === node) {
-      pinnedNode = null;
-      hoverCard.hidden = true;
-      hoverCard.classList.remove('is-pinned');
-      node.classList.remove('is-pinned');
-      return;
-    }
-    if (pinnedNode) pinnedNode.classList.remove('is-pinned');
-    pinnedNode = node;
-    node.classList.add('is-pinned');
-    show(ev);
-  });
+  hover.attach(node, () =>
+    `<div class="hc-title">${esc(item.label)}</div>` + buildEvidence(item, band, currency));
 }
-
-document.addEventListener('keydown', (ev) => {
-  if (ev.key !== 'Escape' || !pinnedNode) return;
-  pinnedNode.classList.remove('is-pinned');
-  pinnedNode = null;
-  hoverCard.hidden = true;
-  hoverCard.classList.remove('is-pinned');
-});
 
 /* Persist and redraw. Every per-asset control routes through here so the
    overview page sees the change on the next navigation. */
@@ -256,10 +179,18 @@ function card(asset, r) {
     const b = el('b');
     l.append(cap);
     if (inp.type === 'range') {
-      b.textContent = `${Number(state.inputs[asset.id][inp.id]).toLocaleString()} ${inp.unit || ''}`.trim();
+      const dialled = Number(state.inputs[asset.id][inp.id]);
+      let shown = `${dialled.toLocaleString()} ${inp.unit || ''}`.trim();
+      if (inp.id === 'km' && asset.kind === 'car' && state.driveMode === 'weekend') {
+        const nCars = ASSETS.filter((a) => a.kind === 'car' && state.enabled[a.id]).length;
+        const eff = Math.max(600, Math.round((state.weekendPool || 5200) / Math.max(1, nCars)));
+        shown = `${eff.toLocaleString()} km/yr effective`;
+      }
+      b.textContent = shown;
       cap.append(b);
       const range = el('input');
       Object.assign(range, { type: 'range', min: inp.min, max: inp.max, step: inp.step, value: state.inputs[asset.id][inp.id] });
+      if (inp.id === 'km' && state.driveMode === 'weekend') range.disabled = true;
       range.addEventListener('input', () => {
         state.inputs[asset.id][inp.id] = Number(range.value);
         commit();
@@ -291,7 +222,18 @@ function card(asset, r) {
       l.append(s);
     }
     box.append(l);
-    if (inp.hint) box.append(el('p', 'hint', esc(inp.hint)));
+    if (inp.id === 'km' && asset.kind === 'car' && state.driveMode === 'weekend') {
+      const nCars = ASSETS.filter((a) => a.kind === 'car' && state.enabled[a.id]).length;
+      const pool = state.weekendPool || 5200;
+      const eff = Math.max(600, Math.round(pool / Math.max(1, nCars)));
+      box.append(el('p', 'hint',
+        `Weekend · one car at a time: costing ${eff.toLocaleString()} km/yr ` +
+        `(${pool.toLocaleString()} km pool ÷ ${nCars} cars). ` +
+        'Fuel / charge / tyres follow this; 车船税 and insurance still bill the full year. ' +
+        'Switch Driving to “as dialled” to use the slider.'));
+    } else if (inp.hint) {
+      box.append(el('p', 'hint', esc(inp.hint)));
+    }
   }
   if (r.variant.warn) box.append(el('p', 'unavailable', esc(r.variant.warn)));
   c.append(box);
@@ -491,6 +433,7 @@ function renderStatic() {
 const openBlocks = new Set();
 
 function render() {
+  hover.reset();
   const results = evaluateAll(state);
   renderChart(results);
   renderAssets(results);

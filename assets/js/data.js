@@ -316,7 +316,7 @@ const emeya = {
     { id: 'invoice', label: '成交价 Invoice total', unit: 'CNY incl. VAT', type: 'number',
       min: 588000, max: 900000, step: 1000, def: 638000,
       hint: 'What you paid, VAT and options included. Tax recomputes.' },
-    { id: 'km',      label: 'Distance driven', unit: 'km/year', type: 'range', min: 3000, max: 40000, step: 1000, def: 15000 },
+    { id: 'km',      label: 'Distance driven', unit: 'km/year', type: 'range', min: 3000, max: 40000, step: 1000, def: 8000 },
     { id: 'chargeMix', label: 'Home charging share', unit: '%', type: 'range', min: 0, max: 100, step: 10, def: 40,
       hint: 'No wallbox in a rented loft, so mostly public charging.' },
   ],
@@ -510,8 +510,9 @@ const emeya = {
           ['BEV passenger car', 'outside the scope of the tax'],
           ['Not merely', 'an exemption that can be repealed'],
           ['2027 NEV exemption repeal', 'affects commercial BEVs, PHEVs, fuel-cell only'],
+          ['Scales with mileage?', 'No — ownership tax, not a usage fee'],
         ],
-        note: 'BEV passenger cars are outside the scope of the tax, not merely exempt — the 2027 repeal of NEV exemptions does not touch them.' }),
+        note: 'BEV passenger cars are outside the scope of the tax, not merely exempt — the 2027 repeal of NEV exemptions does not touch them. On petrol cars this line still bills every year even if the car never leaves the garage.' }),
       it('fees', '年检 (annual inspection)', 0, {
         src: SRC.szInspect, frequencyLabel: 'per year',
         facts: [
@@ -558,7 +559,7 @@ const ferrari = {
     { id: 'options', label: '选配 Options', unit: 'CNY incl. VAT', type: 'number',
       min: 0, max: 900000, step: 10000, def: 300000,
       hint: 'Taxed twice over: 10% purchase tax and 10% luxury tax.' },
-    { id: 'km', label: 'Distance driven', unit: 'km/year', type: 'range', min: 2000, max: 20000, step: 1000, def: 10000 },
+    { id: 'km', label: 'Distance driven', unit: 'km/year', type: 'range', min: 2000, max: 20000, step: 1000, def: 6000 },
     { id: 'plate', label: '粤B 牌照 route', type: 'select', def: 'company',
       options: [
         { v: 'company', l: '单位竞价 — company name, ~¥11,000' },
@@ -701,7 +702,10 @@ const ferrari = {
           ['Legal basis', '粤府〔2022〕81号, valid to 2027-12-31'],
           ['Collected by', 'your insurer, with 交强险'],
           ['Your Emeya (BEV)', '¥0 — outside the tax entirely'],
+          ['Scales with mileage?', 'No — ownership tax'],
+          ['Weekend-only / garage queen', 'still ¥2,400/yr'],
         ],
+        note: 'This is an ownership tax collected with 交强险 once a year. Driving only on weekends — or not at all — does not reduce it. Fuel, tyres and brakes are what scale with how often you drive.',
       }),
       it('maintenance', '保养 — Ferrari 7年原厂保养计划', c.pick({ low: 0, base: 0, high: 8000 }), {
         src: SRC.ferrari7yr, frequencyLabel: 'per year',
@@ -987,7 +991,7 @@ const gtr = {
   ],
   defaultVariant: 'mid',
   inputs: [
-    { id: 'km',      label: 'Distance driven', unit: 'km/year', type: 'range', min: 1000, max: 20000, step: 500, def: 5000 },
+    { id: 'km',      label: 'Distance driven', unit: 'km/year', type: 'range', min: 1000, max: 20000, step: 500, def: 4000 },
     { id: 'workshop',label: 'Where you service it', type: 'select', def: 'dealer',
       options: [{ v: 'dealer', l: 'Nissan dealer — keeps the warranty' }, { v: 'specialist', l: 'GT-R specialist — cheaper, risks cover' }] },
     { id: 'tyre',    label: 'Tyre choice', type: 'select', def: 'oe',
@@ -1080,8 +1084,8 @@ const gtr = {
         ],
         src: v.roadTax === 76400 ? SRC.jpJuukaTrigger : SRC.jpRoadTax,
         note: v.roadTax === 76400
-          ? 'The surcharge catches every car registered on or before 2013-03-31, and it bites from the first 1 April after the 13th anniversary. It is only ¥9,900/yr more, though — do not let it drive your choice of year.'
-          : 'Rises to ¥76,400 once the car passes 13 years. Note the FY2027 reform will redesign this tax around weight and emissions from FY2028 — a 3,799 cc, 1,760 kg car is exposed on both axes.',
+          ? 'The surcharge catches every car registered on or before 2013-03-31, and it bites from the first 1 April after the 13th anniversary. It is only ¥9,900/yr more, though — do not let it drive your choice of year. Ownership tax: mileage does not change it.'
+          : 'Rises to ¥76,400 once the car passes 13 years. Note the FY2027 reform will redesign this tax around weight and emissions from FY2028 — a 3,799 cc, 1,760 kg car is exposed on both axes. Ownership tax: weekend-only driving does not reduce it.',
       }),
       it('tax', `自動車重量税 — annualised (1,760 kg${v.weightTax > 16400 ? ', 13yr+ band' : ''})`, v.weightTax, {
         src: SRC.jpWeightTax, frequencyLabel: 'per year',
@@ -1476,8 +1480,8 @@ const amg = {
   ],
   defaultVariant: 'e53',
   inputs: [
-    { id: 'km',    label: 'Distance driven', unit: 'km/year', type: 'range', min: 3000, max: 30000, step: 1000, def: 12000 },
-    { id: 'tolls', label: 'Toll passages', unit: 'paid/month', type: 'range', min: 0, max: 80, step: 5, def: 40,
+    { id: 'km',    label: 'Distance driven', unit: 'km/year', type: 'range', min: 3000, max: 30000, step: 1000, def: 6000 },
+    { id: 'tolls', label: 'Toll passages', unit: 'paid/month', type: 'range', min: 0, max: 80, step: 5, def: 10,
       hint: '15 stations ring the island. Capped at 80 a month.' },
     { id: 'heater', label: 'Block heater (motorvarmer)', type: 'select', def: 'yes',
       options: [{ v: 'yes', l: 'Fitted — DEFA WarmUp II, ~12,500 kr' }, { v: 'no', l: 'Not fitted — pay ~9% more for fuel' }] },
@@ -1607,7 +1611,7 @@ const amg = {
                 ['Diesel without factory DPF', '8.10 kr/day = 2,957 kr'],
                 ['Electric car', '9.16 kr/day = 3,343 kr'],
                 ['Collected by', 'your insurer, with the liability premium']],
-        note: '6.52 kr/day for a petrol car, collected through your insurer. Quirk worth savouring: EVs pay 9.16 kr/day (3,343/yr), so your AMG is cheaper than a Tesla on this one line.',
+        note: '6.52 kr/day for a petrol car, collected through your insurer. Quirk worth savouring: EVs pay 9.16 kr/day (3,343/yr), so your AMG is cheaper than a Tesla on this one line. It is billed for every day the car is insured — parking it all week does not stop the meter.',
       }),
       it('insurance', `Bilforsikring (kasko)${v.machineCover === false ? ' — no machine-damage cover' : v.machineCover === 'marginal' ? ' — machine cover expiring' : ''}`, c.pick(v.ins), {
         src: SRC.noMachineCover, est: true, frequencyLabel: 'per year',

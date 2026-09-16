@@ -3,8 +3,10 @@
 import { ASSETS, FX } from './data.js';
 import { convert, DAYS_PER_YEAR, evaluateAll, fmt, fmtCompact, PERIODS, portfolio } from './model.js';
 import { bindGlobalControls, loadState } from './state.js';
+import { createHoverController } from './hover.js';
 
 const state = loadState();
+const hover = createHoverController({ showDelay: 320, hideDelay: 220 });
 
 const $ = (sel) => document.querySelector(sel);
 const el = (tag, cls, html) => {
@@ -31,87 +33,9 @@ function hostOf(url) {
   catch { return url.replace(/^https?:\/\//, '').split('/')[0]; }
 }
 
-/* ---------------- hover card on the front page ----------------
- * The numbers people actually stare at live here. Hover (or click) any asset
- * row to see the line items that add up to it, each with its source link.
- */
-const hoverCard = el('div', 'hovercard');
-hoverCard.setAttribute('role', 'tooltip');
-hoverCard.hidden = true;
-document.body.append(hoverCard);
-
-let pinnedNode = null;
-
-function placeCard(ev) {
-  const pad = 14;
-  const { innerWidth: vw, innerHeight: vh } = window;
-  const r = hoverCard.getBoundingClientRect();
-  let x = (ev?.clientX ?? 24) + pad;
-  let y = (ev?.clientY ?? 24) + pad;
-  if (x + r.width > vw - 8) x = Math.max(8, (ev?.clientX ?? 24) - r.width - pad);
-  if (y + r.height > vh - 8) y = Math.max(8, vh - r.height - 8);
-  hoverCard.style.left = `${x}px`;
-  hoverCard.style.top = `${y}px`;
-}
-
-function pointerFor(node, ev) {
-  if (ev && (ev.clientX || ev.clientY)) return ev;
-  const b = node.getBoundingClientRect();
-  return { clientX: b.left + Math.min(160, b.width / 2), clientY: b.bottom };
-}
-
 function attachHover(node, html) {
-  const show = (ev) => {
-    hoverCard.innerHTML = html;
-    hoverCard.hidden = false;
-    hoverCard.classList.toggle('is-pinned', pinnedNode === node);
-    placeCard(pointerFor(node, ev));
-  };
-  const hide = () => {
-    if (pinnedNode) return;
-    hoverCard.hidden = true;
-    hoverCard.classList.remove('is-pinned');
-  };
-  node.addEventListener('mouseenter', (ev) => {
-    if (pinnedNode && pinnedNode !== node) return;
-    show(ev);
-  });
-  node.addEventListener('mousemove', (ev) => {
-    if (hoverCard.hidden || pinnedNode) return;
-    placeCard(ev);
-  });
-  node.addEventListener('mouseleave', hide);
-  node.addEventListener('focusin', (ev) => {
-    if (pinnedNode && pinnedNode !== node) return;
-    show(ev);
-  });
-  node.addEventListener('focusout', (ev) => {
-    if (node.contains(ev.relatedTarget)) return;
-    hide();
-  });
-  node.addEventListener('click', (ev) => {
-    if (ev.target.closest('a')) return;
-    if (pinnedNode === node) {
-      pinnedNode = null;
-      hoverCard.hidden = true;
-      hoverCard.classList.remove('is-pinned');
-      node.classList.remove('is-pinned');
-      return;
-    }
-    if (pinnedNode) pinnedNode.classList.remove('is-pinned');
-    pinnedNode = node;
-    node.classList.add('is-pinned');
-    show(ev);
-  });
+  hover.attach(node, typeof html === 'function' ? html : () => html);
 }
-
-document.addEventListener('keydown', (ev) => {
-  if (ev.key !== 'Escape' || !pinnedNode) return;
-  pinnedNode.classList.remove('is-pinned');
-  pinnedNode = null;
-  hoverCard.hidden = true;
-  hoverCard.classList.remove('is-pinned');
-});
 
 /* Build the evidence HTML for one asset in one period. */
 function assetEvidence(asset, result, period, displayCur) {
@@ -196,9 +120,7 @@ function upfrontEvidence(results, displayCur, p) {
 }
 
 function render() {
-  pinnedNode = null;
-  hoverCard.hidden = true;
-  hoverCard.classList.remove('is-pinned');
+  hover.reset();
 
   const results = evaluateAll(state);
   const cur = state.currency;
@@ -305,8 +227,10 @@ function render() {
   const chips = [
     `${included.length}/${ASSETS.length} assets`,
     { low: 'Optimistic', base: 'Realistic', high: 'Pessimistic' }[state.scenario],
-    'Hover any row for the real data',
-    'Today\u2019s prices',
+    state.driveMode === 'weekend'
+      ? `Weekend · ${Math.round((state.weekendPool || 5200) / Math.max(1, included.filter((a) => a.kind === 'car').length)).toLocaleString()} km/car`
+      : 'Km as dialled on detail',
+    'Dwell on a row for sources',
   ];
   $('#periods').insertAdjacentHTML('beforeend',
     `<p class="periods-note">${chips.map((c) => `<span>${esc(c)}</span>`).join('')}</p>`);

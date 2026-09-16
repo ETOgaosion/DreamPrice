@@ -9,9 +9,10 @@
 import { ASSETS } from './data.js';
 import { defaultInputs } from './model.js';
 
-const KEY = 'dreamprice.state.v1';
+const KEY = 'dreamprice.state.v2';
 const CURRENCIES = ['CNY', 'JPY', 'NOK', 'USD', 'EUR'];
 const SCENARIOS = ['low', 'base', 'high'];
+const DRIVE_MODES = ['weekend', 'as_set'];
 
 export function createState() {
   const s = {
@@ -19,6 +20,9 @@ export function createState() {
     scenario: 'base',
     years: 5,
     inflation: 0.02,
+    /* Default: weekend hobby driving, one car at a time. */
+    driveMode: 'weekend',
+    weekendPool: 5200,
     variants: {},
     inputs: {},
     enabled: {},
@@ -48,6 +52,10 @@ export function loadState() {
 
   if (CURRENCIES.includes(stored.currency)) state.currency = stored.currency;
   if (SCENARIOS.includes(stored.scenario)) state.scenario = stored.scenario;
+  if (DRIVE_MODES.includes(stored.driveMode)) state.driveMode = stored.driveMode;
+  if (Number.isFinite(stored.weekendPool)) {
+    state.weekendPool = Math.min(20000, Math.max(2000, Math.round(stored.weekendPool)));
+  }
   if (Number.isFinite(stored.years)) state.years = Math.min(15, Math.max(1, Math.round(stored.years)));
   if (Number.isFinite(stored.inflation)) state.inflation = Math.min(0.08, Math.max(0, stored.inflation));
 
@@ -105,6 +113,12 @@ export function bindGlobalControls(state, rerender) {
   if (scenario) {
     scenario.value = state.scenario;
     scenario.addEventListener('change', () => { state.scenario = scenario.value; commit(); });
+  }
+
+  const driveMode = $('#drive-mode');
+  if (driveMode) {
+    driveMode.value = state.driveMode;
+    driveMode.addEventListener('change', () => { state.driveMode = driveMode.value; commit(); });
   }
 
   const years = $('#years');

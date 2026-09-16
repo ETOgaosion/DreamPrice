@@ -503,10 +503,10 @@ table.yrs .dim { color: var(--ink-faint); }
   position: fixed; z-index: 200; width: min(400px, calc(100vw - 20px));
   background: #10121b; border: 1px solid var(--line-2); border-radius: 12px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); padding: 0.9rem 1rem;
-  pointer-events: none; font-size: 0.8rem; line-height: 1.5;
+  /* Pointer must be able to enter the card — otherwise DATA links are unreachable. */
+  pointer-events: auto; font-size: 0.8rem; line-height: 1.5;
 }
 .hovercard.is-pinned {
-  pointer-events: auto;
   border-color: rgba(255, 209, 102, 0.55);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 209, 102, 0.2);
 }
