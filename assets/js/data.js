@@ -250,6 +250,9 @@ export const SRC = {
   shChargeFee:   { t: '上海发改委 — 充电服务费上限 1.3 元/度, 2024 中位数 0.42 元',       u: 'https://www.ne21.com/news/show-213116.html' },
   shParking:     { t: '上海住宅车位月租实况 — 周边 600–800 元, 高端内环 1,500–2,200 元',   u: 'https://news.qq.com/rain/a/20260618A09IPW00' },
   shOutOfTown:   { t: '上海公安 — 外省市号牌小客车高架与内环地面限行通告',                 u: 'https://gaj.sh.gov.cn/shga/wzXxfbGj/detail?pa=110ef360e4374a4139beeee03837c2d2021517847ee4ff2e86798592916ec22e' },
+  vesselLaw:     { t: '《车船税法》第六条·第九条 — 按年申报, 保险机构代收',                u: 'http://www.npc.gov.cn/npc/c2/c12435/c12488/201905/t20190522_70160.html' },
+  vesselReg:     { t: '《车船税法实施条例》第十九条·第二十三条 — 分月计算, 一次性缴纳',      u: 'https://www.gov.cn/zhengce/zhengceku/2011-12/09/content_1759.htm' },
+  vesselIdle:    { t: '上海税务 — 车辆停驶期间仍须缴纳车船税',                             u: 'https://shanghai.chinatax.gov.cn/xwdt/ztzl/zhl/yhysgj/nbzy/jsbwl/202512/t478758.html' },
   gdVesselTax:   { t: '广东省财政厅 — 粤府〔2022〕81号 车船税税额表',                    u: 'http://czt.gd.gov.cn/gkmlpt/content/4/4028/post_4028842.html' },
   ferrari7yr:    { t: 'Ferrari 中国 — 7年原厂保养计划 (Genuine Maintenance)',           u: 'https://www.ferrari.com/zh-CN/auto/car-part-services-warranty-maintenance' },
   ferrariSzDealer:{ t: '骏佳行 — the only Ferrari dealer in Shenzhen, service in 坂田',  u: 'https://shenzhen.ferraridealers.com/zh-CN/about-us' },
@@ -534,9 +537,12 @@ const emeya = {
           ['BEV passenger car', 'outside the scope of the tax'],
           ['Not merely', 'an exemption that can be repealed'],
           ['2027 NEV exemption repeal', 'affects commercial BEVs, PHEVs, fuel-cell only'],
-          ['Scales with mileage?', 'No — ownership tax, not a usage fee'],
+          ['If it were petrol', '按年申报, every year, 停驶 included'],
+          ['What a 3.9L V8 would pay', '¥2,400/yr — see the Amalfi'],
         ],
-        note: 'BEV passenger cars are outside the scope of the tax, not merely exempt — the 2027 repeal of NEV exemptions does not touch them. On petrol cars this line still bills every year even if the car never leaves the garage.' }),
+        note: 'BEV passenger cars are outside the scope of the tax, not merely exempt — the 2027 repeal ' +
+              'of NEV exemptions does not touch them. This is one of the few lines where the Emeya is ' +
+              'structurally free rather than temporarily discounted.' }),
       it('fees', '年检 (annual inspection)', 0, {
         src: SRC.szInspect, frequencyLabel: 'per year',
         facts: [
@@ -807,19 +813,28 @@ const ferrari = {
         ],
       }),
       it('tax', '车船税 — 广东, 3.0–4.0L band', 2400, {
-        src: SRC.gdVesselTax, frequencyLabel: 'per year',
+        src: SRC.vesselIdle, frequencyLabel: 'per year',
         facts: [
           ['广东 3.0–4.0L', '¥2,400/yr'],
           ['广东 >4.0L', '¥3,600/yr'],
           ['广东 2.5–3.0L', '¥1,200/yr'],
           ['This car', '3,855 cc — top of the band'],
-          ['Legal basis', '粤府〔2022〕81号, valid to 2027-12-31'],
-          ['Collected by', 'your insurer, with 交强险'],
+          ['Frequency', '按年申报, 分月计算, 一次性缴纳'],
+          ['Tax year', '1 Jan – 31 Dec, 条例第二十三条'],
+          ['First year', '年税额 ÷ 12 × remaining months, 第十九条'],
+          ['Collected by', 'your insurer with 交强险, 车船税法第六条'],
+          ['办了停驶手续?', 'Still taxed — 上海税务 2025 memo'],
+          ['Refundable if', '报废 / 被盗抢 / 灭失 — remaining months only'],
+          ['Sold mid-year', '不另纳税, 也不退税, 第二十条'],
           ['Your Emeya (BEV)', '¥0 — outside the tax entirely'],
-          ['Scales with mileage?', 'No — ownership tax'],
-          ['Weekend-only / garage queen', 'still ¥2,400/yr'],
         ],
-        note: 'This is an ownership tax collected with 交强险 once a year. Driving only on weekends — or not at all — does not reduce it. Fuel, tyres and brakes are what scale with how often you drive.',
+        note: 'Yes, every year — it is a property tax on owning the car, not a fee for using it. ' +
+              '《车船税法》第九条 makes it 按年申报缴纳 and 第六条 puts the insurer in charge of collecting ' +
+              'it alongside 交强险, so it arrives with the renewal. Shanghai\u2019s tax bureau answered this ' +
+              'directly in 2025: an owner who had formally registered the car as 停驶 for two years still ' +
+              'owed it, because 第三条 lists the exemptions and idleness is not among them. Only 报废, ' +
+              '被盗抢 or 灭失 gets you the remaining months back. Buy mid-year and you pay 年税额 ÷ 12 × ' +
+              'the months you owned it; sell mid-year and there is no refund and no second bill for the buyer.',
       }),
       it('maintenance', '保养 — Ferrari 7年原厂保养计划', c.pick({ low: 0, base: 0, high: 8000 }), {
         src: SRC.ferrari7yr, frequencyLabel: 'per year',
