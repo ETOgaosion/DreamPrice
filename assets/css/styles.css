@@ -87,7 +87,7 @@ select, input[type='number'] {
   background-image: linear-gradient(45deg, transparent 50%, var(--ink-dim) 50%), linear-gradient(135deg, var(--ink-dim) 50%, transparent 50%);
   background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%;
   background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
-  cursor: pointer; max-width: 100%;
+  cursor: pointer; max-width: 100%; min-width: 0; box-sizing: border-box;
 }
 select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 option { background: #14161f; color: var(--ink); }
@@ -121,12 +121,12 @@ input[type='checkbox'] { accent-color: var(--accent); width: 15px; height: 15px;
 .periods {
   /* Four tables want a 2x2 block, not three-plus-one orphan. */
   display: grid; gap: 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
 }
 .period {
   border: 1px solid var(--line); border-radius: var(--radius);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
-  overflow: hidden;
+  overflow: hidden; min-width: 0;
 }
 .period > header { padding: 1.35rem 1.5rem 1.1rem; border-bottom: 1px solid var(--line); }
 .period h2 {
@@ -143,8 +143,8 @@ input[type='checkbox'] { accent-color: var(--accent); width: 15px; height: 15px;
   letter-spacing: -0.035em; line-height: 1.05; margin-top: 0.4rem; color: var(--accent);
 }
 
-.period table { width: 100%; border-collapse: collapse; }
-.period td { padding: 0.62rem 1rem 0.62rem 1.5rem; vertical-align: middle; }
+.period table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.period td { padding: 0.62rem 0.75rem 0.62rem 1.15rem; vertical-align: middle; }
 .period tbody tr {
   /* A tint behind each row shows its share without needing a separate chart. */
   background: linear-gradient(to right,
@@ -165,19 +165,29 @@ input[type='checkbox'] { accent-color: var(--accent); width: 15px; height: 15px;
   filter: brightness(1.05);
 }
 .upfront-inner { cursor: help; outline: none; }
-.period td.n { display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; }
-.period td.n .flag { font-size: 1.05rem; }
-.period td.n .nm { display: flex; flex-direction: column; line-height: 1.25; }
-.period td.n .nm small { color: var(--ink-faint); font-size: 0.72rem; }
+.period td.n {
+  display: flex; align-items: center; gap: 0.55rem; font-size: 0.9rem;
+  width: auto; min-width: 0; overflow: hidden;
+}
+.period td.n .flag { font-size: 1.05rem; flex: 0 0 auto; }
+.period td.n .nm {
+  display: flex; flex-direction: column; line-height: 1.25; min-width: 0;
+  overflow: hidden;
+}
+.period td.n .nm small {
+  color: var(--ink-faint); font-size: 0.72rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .period td.lnk {
-  width: 1%; white-space: nowrap; text-align: right; padding-inline: 0.4rem;
+  width: 6.4rem; text-align: right; padding-inline: 0.25rem; overflow: visible;
 }
 .period td.lnk .lnk-wrap {
-  display: inline-flex; gap: 0.35rem; justify-content: flex-end; align-items: center;
+  display: inline-flex; gap: 0.3rem; justify-content: flex-end; align-items: center;
+  max-width: 100%;
 }
 .period td.v {
   text-align: right; font-family: var(--mono); font-size: 0.94rem; white-space: nowrap;
-  padding-right: 1.5rem;
+  width: 4.6rem; padding-right: 1.15rem;
 }
 .period tfoot td {
   border-top: 1px solid var(--line-2); font-weight: 700; font-size: 0.88rem;
@@ -192,39 +202,53 @@ input[type='checkbox'] { accent-color: var(--accent); width: 15px; height: 15px;
   border: 1px solid rgba(255, 209, 102, 0.45); border-radius: 999px;
   padding: 0.12rem 0.45rem; font-size: 0.58rem; font-weight: 700;
   letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent);
-  background: rgba(255, 209, 102, 0.08); text-decoration: none; max-width: 9.5rem;
+  background: rgba(255, 209, 102, 0.08); text-decoration: none;
+  max-width: 100%; overflow: hidden; min-width: 0; flex: 0 1 auto;
 }
 .row-data small, .hc-data small {
   font-size: 0.55rem; font-weight: 600; letter-spacing: 0; text-transform: none;
   color: var(--ink-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  max-width: 5.5rem;
+  max-width: 5.2rem; min-width: 0;
 }
-.row-data::after, .hc-data::after { content: '↗'; }
+/* Overview rows are tight — host lives in the title tooltip, chip stays “DATA”. */
+.period .row-data small { display: none; }
+.row-data::after, .hc-data::after { content: '↗'; flex: 0 0 auto; }
 .row-data:hover, .hc-data:hover { color: #0b0c12; background: var(--accent); border-color: var(--accent); }
 .row-data:hover small, .hc-data:hover small, .row-data:hover::after, .hc-data:hover::after { color: #0b0c12; }
 .row-more {
   font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; color: var(--ink-faint);
   border: 1px solid var(--line); border-radius: 999px; padding: 0.12rem 0.45rem;
-  text-decoration: none;
+  text-decoration: none; flex: 0 0 auto;
 }
 .row-more:hover { color: var(--accent); border-color: var(--accent); }
 
+.hc-title {
+  overflow-wrap: anywhere;
+}
 .hc-title small {
   display: block; font-size: 0.72rem; font-weight: 500; color: var(--ink-faint);
   margin-top: 0.2rem; letter-spacing: 0;
 }
-.hc-lines { display: flex; flex-direction: column; gap: 0.55rem; max-height: 52vh; overflow: auto; }
+.hc-lines {
+  display: flex; flex-direction: column; gap: 0.55rem;
+  min-width: 0;
+}
 .hc-line {
-  padding: 0.45rem 0.5rem; border-radius: 8px;
+  padding: 0.45rem 0.5rem; border-radius: 8px; min-width: 0;
   background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
 }
-.hc-line-top { display: flex; gap: 0.5rem; align-items: baseline; }
-.hc-line-lbl { flex: 1; font-size: 0.78rem; color: var(--ink); }
+.hc-line-top {
+  display: flex; flex-wrap: wrap; gap: 0.35rem 0.5rem; align-items: baseline;
+}
+.hc-line-lbl {
+  flex: 1 1 8rem; min-width: 0; font-size: 0.78rem; color: var(--ink);
+  overflow-wrap: anywhere;
+}
 .hc-line-lbl i { font-style: normal; color: #fdba74; font-size: 0.62rem; font-weight: 700; }
-.hc-line-amt { font-family: var(--mono); font-size: 0.78rem; white-space: nowrap; }
+.hc-line-amt { font-family: var(--mono); font-size: 0.78rem; white-space: nowrap; margin-left: auto; }
 .hc-line-formula {
   margin-top: 0.3rem; font-family: var(--mono); font-size: 0.68rem; color: var(--ink-dim);
-  word-break: break-word;
+  overflow-wrap: anywhere; word-break: break-word;
 }
 .hc-line .hc-facts { margin-top: 0.25rem; }
 .hc-more {
@@ -340,13 +364,13 @@ input[type='checkbox'] { accent-color: var(--accent); width: 15px; height: 15px;
 .legend i { width: 10px; height: 10px; border-radius: 3px; display: block; }
 
 /* ---------- asset cards ---------- */
-.assets { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); }
+.assets { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
 @media (max-width: 700px) { .assets { grid-template-columns: 1fr; } }
 
 .card {
   border: 1px solid var(--line); border-radius: var(--radius);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012));
-  overflow: hidden; position: relative;
+  overflow: hidden; position: relative; min-width: 0;
 }
 .card::before {
   content: ''; position: absolute; inset: 0 0 auto; height: 2px;
@@ -362,10 +386,10 @@ input[type='checkbox'] { accent-color: var(--accent); width: 15px; height: 15px;
 .card-title .onoff { margin-left: auto; }
 .blurb { color: var(--ink-dim); font-size: 0.88rem; margin: 0.9rem 0 0; }
 
-.card-inputs { display: flex; flex-wrap: wrap; gap: 0.85rem 1.25rem; padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--line); background: rgba(0, 0, 0, 0.18); }
-.card-inputs .ctl { font-size: 0.68rem; }
-.card-inputs select { max-width: 100%; }
-.card-inputs .full { flex: 1 1 100%; }
+.card-inputs { display: flex; flex-wrap: wrap; gap: 0.85rem 1.25rem; padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--line); background: rgba(0, 0, 0, 0.18); min-width: 0; }
+.card-inputs .ctl { font-size: 0.68rem; min-width: 0; max-width: 100%; }
+.card-inputs select { width: 100%; max-width: 100%; }
+.card-inputs .full { flex: 1 1 100%; min-width: 0; max-width: 100%; }
 .hint { flex: 1 1 100%; font-size: 0.76rem; color: var(--ink-faint); margin: 0; }
 .unavailable {
   flex: 1 1 100%; font-size: 0.78rem; color: #fca5a5; margin: 0;
@@ -410,9 +434,9 @@ details.block .body { padding: 0.3rem 1.5rem 1.4rem; }
 /* line items */
 .li { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
 .li:last-child { border-bottom: 0; }
-.li-top { display: flex; gap: 0.75rem; align-items: baseline; }
-.li-lbl { font-size: 0.86rem; flex: 1; }
-.li-amt { font-family: var(--mono); font-size: 0.85rem; white-space: nowrap; }
+.li-top { display: flex; flex-wrap: wrap; gap: 0.45rem 0.75rem; align-items: baseline; }
+.li-lbl { font-size: 0.86rem; flex: 1 1 12rem; min-width: 0; overflow-wrap: anywhere; }
+.li-amt { font-family: var(--mono); font-size: 0.85rem; white-space: nowrap; margin-left: auto; }
 .li-amt.zero { color: var(--ink-faint); }
 /* Notes carry the actual reasoning, so they get body-text legibility rather
    than fine-print treatment. */
@@ -429,17 +453,18 @@ details.block .body { padding: 0.3rem 1.5rem 1.4rem; }
 
 /* A visible source chip on every calculated line. */
 .li-link {
-  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.35rem;
+  flex: 0 1 auto; display: inline-flex; align-items: center; gap: 0.35rem;
   border: 1px solid rgba(255, 209, 102, 0.45); border-radius: 999px;
   padding: 0.18rem 0.55rem; font-size: 0.62rem; font-weight: 700;
   letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent);
-  background: rgba(255, 209, 102, 0.08); text-decoration: none; max-width: 12rem;
+  background: rgba(255, 209, 102, 0.08); text-decoration: none;
+  max-width: min(12rem, 100%); overflow: hidden; min-width: 0;
 }
-.li-link span { white-space: nowrap; }
+.li-link span { white-space: nowrap; flex: 0 0 auto; }
 .li-link small {
   font-size: 0.58rem; font-weight: 600; letter-spacing: 0; text-transform: none;
   color: var(--ink-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  max-width: 7.5rem;
+  max-width: 7rem; min-width: 0;
 }
 .li-link::after { content: '↗'; letter-spacing: 0; color: var(--accent); }
 .li-link:hover { color: #0b0c12; background: var(--accent); border-color: var(--accent); }
@@ -452,12 +477,15 @@ details.block .body { padding: 0.3rem 1.5rem 1.4rem; }
 }
 .li-facts {
   width: 100%; border-collapse: collapse; margin-top: 0.45rem; font-size: 0.78rem;
+  table-layout: fixed;
 }
-.li-facts td { padding: 0.18rem 0; vertical-align: top; color: var(--ink-dim); }
+.li-facts td { padding: 0.18rem 0; vertical-align: top; color: var(--ink-dim); overflow-wrap: anywhere; }
 .li-facts td:last-child {
   text-align: right; font-family: var(--mono); font-size: 0.76rem;
-  color: var(--ink); white-space: nowrap; padding-left: 0.75rem;
+  color: var(--ink); padding-left: 0.75rem; width: 45%;
+  white-space: normal; overflow-wrap: anywhere; word-break: break-word;
 }
+.li-facts td:first-child { width: 55%; padding-right: 0.4rem; }
 
 .li-src { font-size: 0.72rem; margin-top: 0.35rem; }
 .li-src a { color: var(--ink-faint); border-bottom-color: transparent; }
@@ -501,10 +529,12 @@ table.yrs .dim { color: var(--ink-faint); }
 /* ---------- hover card: the evidence behind a number ---------- */
 .hovercard {
   position: fixed; z-index: 200; width: min(400px, calc(100vw - 20px));
+  max-height: min(78vh, 640px); overflow-x: hidden; overflow-y: auto;
   background: #10121b; border: 1px solid var(--line-2); border-radius: 12px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); padding: 0.9rem 1rem;
   /* Pointer must be able to enter the card — otherwise DATA links are unreachable. */
   pointer-events: auto; font-size: 0.8rem; line-height: 1.5;
+  box-sizing: border-box;
 }
 .hovercard.is-pinned {
   border-color: rgba(255, 209, 102, 0.55);
@@ -524,13 +554,16 @@ table.yrs .dim { color: var(--ink-faint); }
   font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--ink-faint); font-weight: 700; margin: 0.8rem 0 0.35rem;
 }
-.hc-band, .hc-facts { width: 100%; border-collapse: collapse; }
-.hc-band td, .hc-facts td { padding: 0.2rem 0; vertical-align: top; }
+.hc-band, .hc-facts { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.hc-band td, .hc-facts td { padding: 0.2rem 0; vertical-align: top; overflow-wrap: anywhere; }
 .hc-band td:last-child, .hc-facts td:last-child {
-  text-align: right; font-family: var(--mono); font-size: 0.78rem; white-space: nowrap;
-  padding-left: 0.75rem;
+  text-align: right; font-family: var(--mono); font-size: 0.74rem;
+  padding-left: 0.55rem; width: 48%;
+  white-space: normal; overflow-wrap: anywhere; word-break: break-word;
 }
-.hc-band td:first-child, .hc-facts td:first-child { color: var(--ink-dim); }
+.hc-band td:first-child, .hc-facts td:first-child {
+  color: var(--ink-dim); width: 52%; padding-right: 0.35rem;
+}
 .hc-band tr.on td { color: var(--accent); font-weight: 600; }
 .hc-flat { font-size: 0.74rem; color: var(--ink-faint); margin-top: 0.4rem; }
 .hc-formula {
@@ -570,11 +603,19 @@ table.yrs .dim { color: var(--ink-faint); }
   table.yrs th, table.yrs td { padding: 0.36rem 0.3rem; }
 
   .periods { grid-template-columns: 1fr; }
-  .period > header { padding: 1.1rem 1.15rem 0.9rem; }
-  .period td { padding-inline: 1.15rem; }
+  .period > header { padding: 1.1rem 1rem 0.9rem; }
+  .period td { padding-inline: 0.85rem; }
+  .period td.lnk { width: 4.2rem; }
+  .period td.v { width: 3.8rem; padding-right: 0.85rem; font-size: 0.86rem; }
+  .period .row-more { display: none; }
+  .hc-data small { max-width: 3.8rem; }
+  .hovercard { width: min(360px, calc(100vw - 16px)); padding: 0.75rem 0.8rem; max-height: 72vh; }
+  .card-inputs { padding-inline: 1rem; }
+  .ctl { flex: 1 1 100%; max-width: 100%; min-width: 0; }
   .ctl-link { margin-left: 0; flex-basis: 100%; }
   .cta { padding: 1.25rem; }
   .btn { width: 100%; text-align: center; }
+  .caveats, .sources { grid-template-columns: 1fr; }
 }
 
 /* ---------- reduced motion ---------- */
