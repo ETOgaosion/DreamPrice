@@ -181,8 +181,8 @@ function card(asset, r) {
     if (inp.type === 'range') {
       const dialled = Number(state.inputs[asset.id][inp.id]);
       let shown = `${dialled.toLocaleString()} ${inp.unit || ''}`.trim();
-      if (inp.id === 'km' && asset.kind === 'car' && state.driveMode === 'weekend') {
-        const nCars = ASSETS.filter((a) => a.kind === 'car' && state.enabled[a.id]).length;
+      if (inp.id === 'km' && asset.kind === 'car' && !asset.daily && state.driveMode === 'weekend') {
+        const nCars = ASSETS.filter((a) => a.kind === 'car' && !a.daily && state.enabled[a.id]).length;
         const eff = Math.max(600, Math.round((state.weekendPool || 5200) / Math.max(1, nCars)));
         shown = `${eff.toLocaleString()} km/yr effective`;
       }
@@ -190,7 +190,7 @@ function card(asset, r) {
       cap.append(b);
       const range = el('input');
       Object.assign(range, { type: 'range', min: inp.min, max: inp.max, step: inp.step, value: state.inputs[asset.id][inp.id] });
-      if (inp.id === 'km' && state.driveMode === 'weekend') range.disabled = true;
+      if (inp.id === 'km' && !asset.daily && state.driveMode === 'weekend') range.disabled = true;
       range.addEventListener('input', () => {
         state.inputs[asset.id][inp.id] = Number(range.value);
         commit();
@@ -222,8 +222,8 @@ function card(asset, r) {
       l.append(s);
     }
     box.append(l);
-    if (inp.id === 'km' && asset.kind === 'car' && state.driveMode === 'weekend') {
-      const nCars = ASSETS.filter((a) => a.kind === 'car' && state.enabled[a.id]).length;
+    if (inp.id === 'km' && asset.kind === 'car' && !asset.daily && state.driveMode === 'weekend') {
+      const nCars = ASSETS.filter((a) => a.kind === 'car' && !a.daily && state.enabled[a.id]).length;
       const pool = state.weekendPool || 5200;
       const eff = Math.max(600, Math.round(pool / Math.max(1, nCars)));
       box.append(el('p', 'hint',

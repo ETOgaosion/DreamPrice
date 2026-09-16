@@ -388,7 +388,7 @@ function render() {
     `${included.length}/${ASSETS.length} assets`,
     { low: 'Optimistic', base: 'Realistic', high: 'Pessimistic' }[state.scenario],
     state.driveMode === 'weekend'
-      ? `Weekend · ${Math.round((state.weekendPool || 5200) / Math.max(1, included.filter((a) => a.kind === 'car').length)).toLocaleString()} km/car`
+      ? `Weekend · ${Math.round((state.weekendPool || 5200) / Math.max(1, included.filter((a) => a.kind === 'car' && !a.daily).length)).toLocaleString()} km/toy`
       : 'Km as dialled on detail',
     'Dwell on a row for sources',
   ];

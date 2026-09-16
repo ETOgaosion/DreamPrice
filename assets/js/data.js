@@ -246,6 +246,10 @@ export const SRC = {
   shPlateFaq:    { t: '上海市交通委 — 名下有外牌车辆可直接参拍，无需注销',                 u: 'https://jtw.sh.gov.cn/zcgd/20241231/5937514701f54d0091a349f29030ac77.html' },
   shPlateResult: { t: '上海市交通委 — 2026年第8次拍卖: 均价 ¥93,868, 中标率 14.4%',      u: 'https://jtw.sh.gov.cn/xydt/20260831/b4315f6409ac4d749ffeb4fe44547965.html' },
   shNevPlate:    { t: '沪府办规〔2025〕21号 — 新能源汽车专用牌照额度免费发放条件',        u: 'https://www.shanghai.gov.cn/202603bgtwj/20260210/84cb024ac225492f82d4039da1fe320f.html' },
+  shPower:       { t: '上海市发改委 — 居民阶梯电价表, 谷时段 0.307 元/度',                u: 'https://fgw.sh.gov.cn/ys-szgyjcssfw-1.4.2-h5/20240819/7fb7e5f30e7543febf8911076bf9ffd2.html' },
+  shChargeFee:   { t: '上海发改委 — 充电服务费上限 1.3 元/度, 2024 中位数 0.42 元',       u: 'https://www.ne21.com/news/show-213116.html' },
+  shParking:     { t: '上海住宅车位月租实况 — 周边 600–800 元, 高端内环 1,500–2,200 元',   u: 'https://news.qq.com/rain/a/20260618A09IPW00' },
+  shOutOfTown:   { t: '上海公安 — 外省市号牌小客车高架与内环地面限行通告',                 u: 'https://gaj.sh.gov.cn/shga/wzXxfbGj/detail?pa=110ef360e4374a4139beeee03837c2d2021517847ee4ff2e86798592916ec22e' },
   gdVesselTax:   { t: '广东省财政厅 — 粤府〔2022〕81号 车船税税额表',                    u: 'http://czt.gd.gov.cn/gkmlpt/content/4/4028/post_4028842.html' },
   ferrari7yr:    { t: 'Ferrari 中国 — 7年原厂保养计划 (Genuine Maintenance)',           u: 'https://www.ferrari.com/zh-CN/auto/car-part-services-warranty-maintenance' },
   ferrariSzDealer:{ t: '骏佳行 — the only Ferrari dealer in Shenzhen, service in 坂田',  u: 'https://shenzhen.ferraridealers.com/zh-CN/about-us' },
@@ -296,13 +300,15 @@ const emeya = {
   id: 'emeya',
   kind: 'car',
   owned: true,
+  /* The commuter, not a weekend toy — it keeps its own mileage. */
+  daily: true,
   flag: '🇨🇳',
   name: 'Lotus Emeya 600 SE',
-  nativeName: '莲花跑车 Emeya 600 SE · 已购入 · 沪牌在深圳使用',
-  place: 'Shenzhen, China',
+  nativeName: '莲花跑车 Emeya 600 SE · 已购入 · 沪牌 · 江浙沪代步',
+  place: 'Shanghai, China',
   currency: 'CNY',
   accent: '#f5c542',
-  blurb: 'Bought: a 600 SE invoiced at ¥638,000, options included. Options are taxed too.',
+  blurb: 'Bought: a 600 SE invoiced at ¥638,000, on a Shanghai green plate. The daily car.',
   variants: [
     {
       id: '600se',
@@ -320,11 +326,13 @@ const emeya = {
     { id: 'invoice', label: '成交价 Invoice total', unit: 'CNY incl. VAT', type: 'number',
       min: 588000, max: 900000, step: 1000, def: 638000,
       hint: 'What you paid, VAT and options included. Tax recomputes.' },
-    { id: 'km',      label: 'Distance driven', unit: 'km/year', type: 'range', min: 3000, max: 40000, step: 1000, def: 8000 },
-    { id: 'chargeMix', label: 'Home charging share', unit: '%', type: 'range', min: 0, max: 100, step: 10, def: 40,
-      hint: 'No wallbox in a rented loft, so mostly public charging.' },
+    { id: 'km',      label: 'Distance driven', unit: 'km/year', type: 'range', min: 3000, max: 40000, step: 1000, def: 15000,
+      hint: 'The daily car, so this slider always applies.' },
+    { id: 'chargeMix', label: 'Home charging share', unit: '%', type: 'range', min: 0, max: 100, step: 10, def: 60,
+      hint: 'Overnight home charging bills at the ¥0.307 谷时段 rate.' },
   ],
-  rates: { home: 0.70, public: 1.40 },
+  /* Shanghai: 谷时段 residential power, tiers 1–2; public = 电费 + 服务费. */
+  rates: { home: 0.35, public: 1.10 },
   /* Optimistic = holds value best. Base 3-yr residual lands at ~49%, between the observed
      Emeya R+ resale (48.9%) and the all-BEV market average (45%). */
   depreciation: { y1: { low: 0.25, base: 0.32, high: 0.40 }, yn: { low: 0.12, base: 0.15, high: 0.18 } },
@@ -435,10 +443,10 @@ const emeya = {
           ['After 1 claim-free year', '¥855'],
           ['After 2 claim-free years', '¥760'],
           ['After 3 claim-free years', '¥665'],
-          ['Guangdong floor', '¥617–665'],
-          ['National floor (not applicable here)', '¥475'],
+          ['Scales with mileage?', 'No — a flat annual premium'],
         ],
-        note: 'Drops to ¥855 / ¥760 / ¥665 after one, two and three claim-free years. Guangdong has a floor around ¥617–665 — the national ¥475 floor does not apply here.',
+        note: 'Drops to ¥855 / ¥760 / ¥665 after one, two and three claim-free years. The base rate is ' +
+              'national; only the no-claims ladder moves it.',
       }),
       it('insurance', '商业险 (车损 + 300万三者 + 不计免赔 + 车上人员)', commercial, {
         src: SRC.cpicNev, est: true, frequencyLabel: 'per year',
@@ -457,7 +465,7 @@ const emeya = {
               `history, so insurers price it defensively. Get three real quotes.`,
       }),
       it('energy', `Charging — ${Math.round(kwh).toLocaleString()} kWh at ¥${rate.toFixed(2)}/kWh`, kwh * rate, {
-        src: SRC.emeyaOwner, frequencyLabel: 'per year',
+        src: SRC.shPower, frequencyLabel: 'per year',
         formula: `${km.toLocaleString()} km ÷ 100 × ${v.kwh100} kWh × ¥${rate.toFixed(2)} = ${cny(kwh * rate)}`,
         facts: [
           ['Battery', '102 kWh'],
@@ -465,14 +473,19 @@ const emeya = {
           ['Owner highway test, 274 km', '20.3–21.5'],
           ['Owner summer mixed', '22–23 — used here'],
           ['Owner city / aggressive', 'up to 30'],
-          ['Shenzhen home tariff, tier 1', '¥0.663/kWh'],
-          ['Home blended (used)', '¥0.70'],
-          ['Public off-peak', '¥0.8–1.0'],
-          ['Public mid-peak (used)', '¥1.40'],
-          ['Public peak', '¥1.5–2.0'],
+          ['上海 谷时段 (22:00–06:00), tier 1', '¥0.307/kWh'],
+          ['上海 峰时段, tier 1', '¥0.617/kWh'],
+          ['Tier 2 / tier 3 谷时段', '¥0.337 / ¥0.487'],
+          ['Home blended (used)', '¥0.35 — overnight, tiers 1–2'],
+          ['Public 电费 average 2024', '¥0.68/kWh'],
+          ['Public 服务费 median 2024', '¥0.42/kWh — cap is ¥1.30'],
+          ['Public blended (used)', '¥1.10'],
           ['Your mix', `${Math.round(homeShare * 100)}% home / ${Math.round((1 - homeShare) * 100)}% public`],
         ],
-        note: `${v.kwh100} kWh/100km is owner-measured real-world consumption, not the ${18.8} CLTC figure. Public charging in Shenzhen went fully market-priced on 2026-03-01.`,
+        note: `${v.kwh100} kWh/100km is owner-measured real-world consumption, not the ${18.8} CLTC figure. ` +
+              'Shanghai splits the day at 22:00, and the 谷时段 rate is less than half the peak, so charging ' +
+              'overnight at home is the single biggest lever on this line. Public charging is 电费 plus a ' +
+              '服务费 the city caps at ¥1.30 but which actually runs around ¥0.42.',
       }),
       it('tyres', `Tyres — Michelin Pilot Sport EV, staggered 265/305`, c.pick({ low: v.tyreSet * 0.8, base: v.tyreSet, high: v.tyreSet * 1.6 }) / v.tyreLife * km, {
         src: SRC.psEvTyre, est: true, frequencyLabel: 'per year',
@@ -500,18 +513,20 @@ const emeya = {
         ],
         note: 'Lotus China includes 5 years of free scheduled servicing, unlimited mileage and visits. Confirm it in your own 购车合同. Post-warranty runs about ¥2,033/yr.',
       }),
-      it('parking', 'Parking — monthly card', c.pick({ low: 3600, base: 9600, high: 21600 }), {
-        src: SRC.szParking, frequencyLabel: 'per year',
-        formula: `${cny(c.pick({ low: 300, base: 800, high: 1800 }))}/month × 12`,
+      it('parking', 'Parking — monthly space', c.pick({ low: 4800, base: 9600, high: 21600 }), {
+        src: SRC.shParking, frequencyLabel: 'per year',
+        formula: `${cny(c.pick({ low: 400, base: 800, high: 1800 }))}/month × 12`,
         facts: [
-          ['Residential estate space', '¥300/mo'],
-          ['Futian 车公庙', '¥450/mo'],
-          ['Nanshan 北科大厦', '¥580/mo'],
-          ['科兴科学园 / 深圳湾', '¥600/mo'],
-          ['Qianhai premium tower', '¥800/mo — used here'],
+          ['Outer-district estate', '¥180–400/mo'],
+          ['Typical Shanghai estate', '¥600–800/mo — used here'],
+          ['内环 high-end residential', '¥1,500–2,200/mo'],
+          ['Grade-A office tower', '¥450–1,660/mo'],
+          ['Reported outlier', '¥1,800/mo, ¥3,000 on 负一层'],
           ['Car length × width', '5,139 × 2,005 mm'],
         ],
-        note: 'The Emeya is 5,139 mm long and 2,005 mm wide. Verify the bay before committing — many Shenzhen spaces are sized for far smaller cars.',
+        note: 'The single widest range in this car: an outer-district space is ¥400 a month, an 内环 ' +
+              'high-end one is ¥1,800. At 5,139 mm long and 2,005 mm wide the Emeya will not fit every ' +
+              'bay — measure before signing.',
       }),
       it('tax', '车船税', 0, {
         src: SRC.vesselTax, frequencyLabel: 'per year',
@@ -532,20 +547,19 @@ const emeya = {
           ['NEV battery safety test', 'mandatory from 2025-03-01 (GB/T 44500-2024)'],
         ],
         note: 'No physical inspection for the first 6 years. Void if the car causes a serious accident or is illegally modified.' }),
-      it('fees', '深圳限外 — 沪牌 is a non-粤B plate here', 0, {
-        src: SRC.szOutOfTown, frequencyLabel: 'per year', informational: true,
+      it('fees', '限行 — a 沪牌 goes everywhere in Shanghai', 0, {
+        src: SRC.shOutOfTown, frequencyLabel: 'per year', informational: true,
         facts: [
-          ['Banned', 'Mon–Fri 07:00–09:00 and 17:30–19:30, citywide'],
-          ['Green plates exempt?', 'No — 含燃油、新能源、混动'],
-          ['Exemptions', 'HK, Macau and consular plates only'],
-          ['Free days', '1/month citywide + 2/month each in 盐田, 光明, 大鹏'],
-          ['Motorways and port roads', 'open throughout'],
-          ['Weekends & public holidays', 'unrestricted'],
-          ['Penalty', 'first 2 free per notice period, then ¥300 + 1 point'],
+          ['沪A / 沪B on 高架', 'unrestricted'],
+          ['沪A / 沪B inside 内环', 'unrestricted'],
+          ['外省市号牌 on 高架', 'banned 07:00–20:00 on weekdays'],
+          ['外省市号牌 inside 内环地面', 'banned 07:00–09:00 and 17:00–19:00'],
+          ['Penalty for those', '¥200 and 3 points, camera-enforced'],
+          ['沪C', 'barred from the central area — not your plate'],
         ],
-        note: 'Costs nothing, but it shapes how the car can be used: a Shanghai green plate gets no ' +
-              'concession in Shenzhen, so the Emeya is off the road on weekday peaks like any other ' +
-              'out-of-town car. For weekend driving it never bites.' }),
+        note: 'Worth nothing in cash and a lot in practice. The free green-plate quota buys the same ' +
+              'freedom of movement a ¥93,868 客车额度 does: 18 elevated roads and the whole 内环 stay open ' +
+              'to you on weekday mornings, while an out-of-town plate is locked out 07:00–20:00.' }),
     ];
   },
 };
@@ -2048,7 +2062,8 @@ export const CAVEATS = [
       'The auction has been getting cheaper all year — ¥16,421 in 第5期, ¥11,670 in 第8期, against a ' +
       '¥10,000 floor — and the lottery alternative is free but hopeless at 0.112%. The company route and ' +
       'the out-of-town plate both exist, but they now cost you either the title or the weekday peaks to ' +
-      'save about ¥1,000 and ¥11,670 respectively.',
+      'save about ¥1,000 and ¥11,670 respectively. It cuts the other way too: leave the Amalfi on a 沪牌 ' +
+      'and it inherits the Shenzhen peak ban, which is the one thing a 粤B is worth paying to avoid.',
     src: SRC.szPlateRules,
   },
   {
@@ -2065,17 +2080,16 @@ export const CAVEATS = [
     src: SRC.shPlateFaq,
   },
   {
-    tag: 'Your Shanghai green plate is restricted in Shenzhen',
+    tag: 'Two cars, two cities, two plates — and neither is restricted',
     body:
-      'This costs nothing but shapes the whole plan. Shenzhen\u2019s 限外 notice covers 非本市核发机动车号牌 ' +
-      'load-carrying cars 含燃油、新能源、混动 — new-energy plates get no concession — and bans them ' +
-      'citywide on weekdays from 07:00 to 09:00 and 17:30 to 19:30. Only Hong Kong, Macau and consular ' +
-      'plates are exempt. Motorways and the port and airport approach roads stay open, you get one free ' +
-      'day a month citywide plus two each in 盐田, 光明 and 大鹏, and the first two violations in each ' +
-      'notice period are unpunished before it becomes ¥300 and a point. Weekends and public holidays are ' +
-      'untouched, so for weekend driving none of this matters — but it is the reason a 粤B on the Ferrari ' +
-      'is worth its ¥11,670 rather than taking a free out-of-town plate to match the Emeya.',
-    src: SRC.szOutOfTown,
+      'The Emeya is the 江浙沪 daily car on a Shanghai green plate, and the Amalfi is the Guangdong ' +
+      'weekend car on a 粤B. That split is what makes both plates cheap. In Shanghai a 沪牌 rides the ' +
+      'elevated roads and the 内环 freely while 外省市号牌 cars are locked out 07:00–20:00; the green ' +
+      'quota cost nothing and buys exactly the same freedom as a ¥93,868 auctioned one. In Shenzhen a ' +
+      '粤B at ¥11,670 escapes the 07:00–09:00 and 17:30–19:30 ban that would otherwise follow a ' +
+      'non-local plate around all week. Cross the cars over and both advantages vanish: the Emeya would ' +
+      'be peak-banned in Shenzhen, and a Shanghai-plated Ferrari would be too.',
+    src: SRC.shOutOfTown,
   },
   {
     tag: 'The Ferrari pays every tax the Emeya dodges',

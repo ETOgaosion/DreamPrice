@@ -47,12 +47,15 @@ export function evaluate(asset, state) {
 
   /*
    * Weekend · one car at a time: you do not put 15,000 km on every toy. A shared
-   * annual pool (~100 km × 52 weekends) is split across the cars that are still
-   * switched on. Ownership taxes (车船税 / 自動車税 / TFA) do not care — they
-   * bill whether the car moves or not.
+   * annual pool (~100 km × 52 weekends) is split across the toys that are still
+   * switched on. Daily drivers keep their own mileage — the pool is about
+   * hobby cars competing for the same weekends. Ownership taxes (车船税 /
+   * 自動車税 / TFA) do not care either way: they bill whether the car moves.
    */
-  if (asset.kind === 'car' && state.driveMode === 'weekend' && Number.isFinite(inputs.km)) {
-    const nCars = ASSETS.filter((a) => a.kind === 'car' && state.enabled?.[a.id] !== false).length;
+  if (asset.kind === 'car' && !asset.daily && state.driveMode === 'weekend' && Number.isFinite(inputs.km)) {
+    const nCars = ASSETS.filter(
+      (a) => a.kind === 'car' && !a.daily && state.enabled?.[a.id] !== false,
+    ).length;
     const pool = Number.isFinite(state.weekendPool) ? state.weekendPool : 5200;
     inputs.kmDialled = inputs.km;
     inputs.km = Math.max(600, Math.round(pool / Math.max(1, nCars)));
