@@ -551,10 +551,11 @@ const ferrari = {
       cc: 3855, lPer100: { low: 11.2, base: 15, high: 18 },
       ins: { low: 55000, base: 70000, high: 100000 },
       dep: { low: 0.07, base: 0.10, high: 0.15 },
-      warn: '深圳 blocks a 粤B plate in your own name: 第十五条(三) requires no car registered in ' +
-            'Shenzhen, and the Emeya is yours. 第十六条 grants a second quota for 新能源 only. A 沪牌 ' +
-            'is legally open to you — Shanghai ignores out-of-town cars — but costs ~¥94,000 and twelve ' +
-            'months of Shanghai social insurance. Pick the plate route before the budget.',
+      warn: '深圳 blocks a 粤B plate in your own name while you keep the Emeya: 第十五条(三) requires no ' +
+            'car registered in Shenzhen, and 第十六条 grants a second quota for 新能源 only. Selling the ' +
+            'Emeya reopens it, but only after its 纯电动 renewal entitlement lapses at six months. A 沪牌 ' +
+            'works today — Shanghai ignores out-of-town cars — at ~¥94,000 plus a year of Shanghai social ' +
+            'insurance. Pick the plate route before the budget.',
     },
   ],
   defaultVariant: 'amalfi',
@@ -698,7 +699,9 @@ const ferrari = {
             ['Lottery odds, 第7期', '0.112%'],
             ['Annual 普通 quota cap', '80,000'],
             ['BEV quota by comparison', 'free, uncapped, no lottery'],
-            ['Closed to you personally', '第十五条(三) — you own the Emeya'],
+            ['Blocked while you own the Emeya', '第十五条(三)'],
+            ['Opens if you sell it and wait', '6 months for the 纯电动 renewal to lapse'],
+            ['Emeya renewal quota type', '纯电动 — 第六十一条(一), no use for a V8'],
             ['Lending the plate is banned', '第七十八条 — 3-year ban if caught'],
           ],
         note: {
@@ -710,7 +713,8 @@ const ferrari = {
             'quota, which 第十五条(三) still refuses you while the Emeya is registered in Shenzhen.',
           family:
             'Cheap, but the plate and the car both belong to whoever bids. 第十五条(三) closes 个人竞价 to ' +
-            'you personally for as long as the Emeya is registered in Shenzhen.',
+            'you personally for as long as the Emeya is registered in Shenzhen — sell it, let the 纯电动 ' +
+            'renewal entitlement lapse after six months, and you can bid in your own name instead.',
           shanghai:
             'The one route that puts a petrol Ferrari on a plate in your own name. Shanghai only excludes ' +
             'people who already hold a Shanghai quota or a car registered on one — the 交通委 FAQ says a ' +
@@ -2014,17 +2018,19 @@ export const CAVEATS = [
     src: SRC.szElecConvert,
   },
   {
-    tag: 'You cannot register the Ferrari in Shenzhen while you own the Emeya',
+    tag: 'The personal 粤B route is blocked by the Emeya, not closed forever',
     body:
-      'This is a gate, not a cost line. 《深圳市小汽车增量调控管理实施细则》第十五条(三) only grants ' +
-      'the petrol-capable 普通小汽车增量指标 to an applicant with no car registered in Shenzhen, and the ' +
-      'Emeya is registered to you. 第十六条 grants a second quota for 新能源 only. And selling the Emeya ' +
-      'does not help: 第五十二条 makes the renewal quota match the original type, so a BEV-quota car yields ' +
-      'a BEV renewal quota that still cannot register a petrol car. The workable routes are a company ' +
-      'quota (a Shenzhen-registered firm that paid ¥50,000 of local tax last year, with the car titled to ' +
-      'it), a family member with no Shenzhen car, a 沪牌 won at auction, or a non-粤B plate that is banned ' +
-      'citywide on weekday peaks. Worth knowing: a Ferrari 296 GTB is a plug-in hybrid and qualifies for ' +
-      'the free, uncapped 混合动力 quota as a legitimate second car — the plate problem disappears entirely.',
+      'The gate is conditional. 《深圳市小汽车增量调控管理实施细则》第十五条(三) grants the petrol-capable ' +
+      '普通小汽车增量指标 only to an applicant with no car registered in Shenzhen, and 第十六条 grants a ' +
+      'second quota for 新能源 only — so while the Emeya sits on your 行驶证 you cannot bid for a petrol ' +
+      'quota in your own name. Give up the Emeya and the same door opens, but not immediately: 第六十一条' +
+      '(一) matches a renewal quota to the original type, so the Emeya yields a 纯电动 renewal quota that ' +
+      'cannot register a Ferrari. You would have to let that entitlement lapse — 第五十九条 gives you six ' +
+      'months to claim it — and only then does 第十五条 see you as carless and unentitled, free to enter ' +
+      'the 竞价 at roughly ¥11,670 or the 摇号 at 0.112% odds. Keeping the Emeya, the alternatives are a ' +
+      'company quota, a family member who owns no Shenzhen car, a 沪牌, or a free non-粤B plate. And the ' +
+      'cleanest answer is a different Ferrari: the 296 GTB is a plug-in hybrid, so it qualifies for the ' +
+      'free, uncapped 混合动力 quota as a second car and the plate problem disappears entirely.',
     src: SRC.szPlateRules,
   },
   {
